@@ -41,12 +41,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.scale
 
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
+enableEdgeToEdge()
         setContent {
             App()
         }
@@ -59,10 +58,7 @@ fun AppAndroidPreview() {
     App()
 
 }
-
-val sizeForImg = 60.dp
-
-
+val sizeForImg = 40.dp
 @Composable
 fun greetingWithImg(message: String, from: String, modifier: Modifier) {
 
@@ -98,11 +94,9 @@ fun createTileSet() {
         .fillMaxSize(),
         contentAlignment = Alignment.Center
         ){
-        HorizontalGrid(6, 6)
+        val sizeForGrid=10
+        HorizontalGrid(sizeForGrid, sizeForGrid)
     }
-
-
-
 }
 
 
@@ -133,7 +127,7 @@ fun HorizontalGrid(rows: Int, columns: Int) {
                             shape = CutCornerShape(0.dp),
                             modifier = Modifier
 
-                                .size(60.dp)
+                                .size(sizeForImg)
                         ) {
 
 
