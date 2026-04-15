@@ -2,6 +2,7 @@ package com.happy.vonviereck
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,21 +14,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun mainScreen(
-    modifier: Modifier=Modifier.fillMaxSize(),
+fun mainScreen() {
 
-){
-
-    Column(
-        modifier = modifier
-            .background(Color.Green),
-
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        modifier = Modifier
+            .background(Color.Green)
+            .fillMaxSize(),
     ) {
-        Text(text = "1.Abschnitt",
-            modifier= Modifier
-            .padding(0.dp,30.dp)
+        Text(
+            text = "1.Abschnitt",
+            modifier = Modifier
+                .padding(0.dp, 30.dp)
         )
         Text(text = "2.Abschnitt")
 

@@ -55,7 +55,7 @@ class Tile {
 
     var currentImageRes by mutableStateOf(R.drawable.tileboden23542352)  //Der originalTile kann aber zu hinderniss werden -> mutableStateOF wird dann benötigt weil man es ändert
     var darfGehen = true //Bool zum überprüfen ob man das Tile betreten darf
-    var isInEditMode = false
+    var isInEditMode = true
 
 
     //Kurze Zusammenfassung: Es wird ein Img von den TIle erstellt mit nen Button drinne der aber unsichtbar gemacht wird(funktioniert)
@@ -116,5 +116,11 @@ class Tile {
             darfGehen = true
             Log.d("Tile", "Tile x=$xCord, y=$yCord → Boden")
         }
+    }
+
+    fun makeWandTile(){
+        currentImageRes = R.drawable.hindernisse
+        darfGehen = false
+        Log.d("Tile", "Tile x=$xCord, y=$yCord → Mauer")
     }
 }

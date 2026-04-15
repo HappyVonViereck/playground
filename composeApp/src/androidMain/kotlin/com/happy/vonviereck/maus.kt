@@ -49,7 +49,7 @@ class Maus {
                 .size(50.dp)
                 .offset { IntOffset(animatedX.value.toInt(), animatedY.value.toInt()) }
                 .onGloballyPositioned {
-                    val pos = it.positionInRoot()
+                    it.positionInRoot()
 
                 }) {
             Image(

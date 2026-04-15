@@ -31,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -39,12 +40,5 @@ import learningareproject.composeapp.generated.resources.Res
 import learningareproject.composeapp.generated.resources.compose_multiplatform
 import kotlin.math.roundToInt
 
-@Composable
-@Preview
-fun App() {
 
-    MaterialTheme() {
-        mainScreen()
-        createTileSet()
-    }
-}
+
