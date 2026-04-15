@@ -19,6 +19,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation("com.google.code.gson:gson:2.10.1")
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)

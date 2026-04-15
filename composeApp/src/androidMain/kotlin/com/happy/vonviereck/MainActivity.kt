@@ -45,7 +45,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-enableEdgeToEdge()
         setContent {
             App()
         }
@@ -58,7 +57,9 @@ fun AppAndroidPreview() {
     App()
 
 }
+
 val sizeForImg = 40.dp
+
 @Composable
 fun greetingWithImg(message: String, from: String, modifier: Modifier) {
 
@@ -67,14 +68,12 @@ fun greetingWithImg(message: String, from: String, modifier: Modifier) {
     val tile = painterResource(R.drawable.tileboden)
 
     Image(
-        modifier = Modifier
-            .size(sizeForImg + 10.dp, sizeForImg),
+        modifier = Modifier.size(sizeForImg + 10.dp, sizeForImg),
         painter = maus,
         contentDescription = null
     )
     Image(
-        modifier = Modifier
-            .size(sizeForImg, sizeForImg),
+        modifier = Modifier.size(sizeForImg, sizeForImg),
         painter = imgGerman,
         contentDescription = "das ist sehr deutsch"
     )
@@ -90,64 +89,74 @@ fun greetingWithImg(message: String, from: String, modifier: Modifier) {
 
 @Composable
 fun createTileSet() {
-    Box(modifier = Modifier
-        .fillMaxSize(),
-        contentAlignment = Alignment.Center
-        ){
-        val sizeForGrid=10
+
+    var t = Text("Halllooo")
+    Button(onClick = {}) { }
+
+    Box(
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+    ) {
+
+        val sizeForGrid = 10
         HorizontalGrid(sizeForGrid, sizeForGrid)
+
     }
+
+
 }
 
 
-
-
+//erstellt das grid und die maus
 @Composable
 fun HorizontalGrid(rows: Int, columns: Int) {
     val items = (100..200).toList()
     val maxItems = rows * columns
+    val maus = remember { Maus() }
 
-    Column {
-        repeat(rows) { row ->
-            Row {
-                repeat(columns) { col ->
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.align(Alignment.Center), // Column zentrieren
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
 
-                    val index = row * columns + col
+            repeat(rows) { row ->
+                Row {
+                    repeat(columns) { col ->
+                        val index = row * columns + col
 
-                    if (index < items.size && index < maxItems) {
+                        if (index < items.size && index < maxItems) {
+                            val x = col
+                            val y = row
+                            val tileBlock = remember { Tile() }
 
-                        val x = col   // Spalte
-                        val y = row   // Zeile
-                        val tileBlock = remember { Tile() }
+                            tileBlock.xCord = x
+                            tileBlock.yCord = y
 
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            ),
-                            shape = CutCornerShape(0.dp),
-                            modifier = Modifier
-
-                                .size(sizeForImg)
-                        ) {
-
-
-                            tileBlock.refrehsCords(x, y)
-
-                            println("x: ${tileBlock.xCord}, y: ${tileBlock.yCord}")
-                            println("row: ${x}, columm: ${y}")
-                            if (tileBlock.xCord==rows-1||tileBlock.yCord==columns-1 ||tileBlock.xCord==0||tileBlock.yCord==0){
-
-                                tileBlock.convertTileToHinderniss()
-
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                ),
+                                shape = CutCornerShape(0.dp),
+                                modifier = Modifier.size(sizeForImg)
+                            ) {
+                                if (tileBlock.xCord == rows - 1 || tileBlock.yCord == columns - 1 || tileBlock.xCord == 0 || tileBlock.yCord == 0) {
+                                    tileBlock.toggleTile()
+                                }
+//                                if(tileBlock.xCord==3&&tileBlock.yCord==3){
+//                                    tileBlock.convertTileToHinderniss()
+//                                }
+                                tileBlock.createATile(maus)
                             }
-                            tileBlock.createATile()
                         }
-
-
                     }
                 }
             }
         }
+
+        // Maus als letztes im Box — liegt über allem
+        maus.createMaus()
+        maus.moveMouse(435, 1095)
     }
 }
 
