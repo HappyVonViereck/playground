@@ -1,0 +1,42 @@
+-Die maus braucht globale coords 
+-wenn sich die coords ändern dann checken ob die coord betretbar ist
+-wenn nicht dann stehen bleiben und move mehtode beenden/abbrechen
+
+
+Ideen:
+alle verbotenen coords in eine liste tun, damit wenn die coords sich mit der der Maus gleichen  das man dann easy checken kann hier ist eine wand
+->eher mit mathe statt mit physics ig
+
+numberToCheck(Int,Das Objeckt welches man überprüfen will, in den Fall die Coordinaten der Maus)
+numbers(Die Liste mit den Koordinaten die verboten sind)
+
+if (numberToCheck in numbers) {
+    println("The list contains the number: $numberToCheck")
+} else {
+    println("The list does not contain the number: $numberToCheck")
+}
+
+
+
+Wegfinder:
+-1.Schritt wände ignorieren und den dierekten weg gehen
+-wenn wand im weg den  ach keine ahnung :v
+
+
+Lösungsanstatz:
+
+if(MausCoord.x !=letzeMausCoord.x || MausCoord.y !=letzeMausCoord.y){
+println(Die Position der Maus hat sich verändert, es wird überprüft ob die jetze koordinate eine wand ist)
+
+if(MausCoord.x in verboteneCoords.x && MausCoord.y in verboteneCoords.y){
+Maus.stopMoving()
+println(Die Coordinate von der Maus ist gleich mit einer verbotenen coordinate-> da muss eine wand sein)
+return true  //Nur maybe idk
+}
+else
+{
+println(Die Coordinate ist eine betretfreie Fläche die maus kann weiter laufen)
+Maus.move()
+return true  //Nur maybe idk
+}
+}
