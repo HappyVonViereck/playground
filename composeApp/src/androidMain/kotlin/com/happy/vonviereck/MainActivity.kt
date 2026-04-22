@@ -1,8 +1,13 @@
 package com.happy.vonviereck
 
+import android.R
+import android.R.attr.icon
+import android.R.attr.name
 import android.media.Image
 import android.os.Bundle
 import android.text.Layout
+import android.util.Log
+import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -35,11 +41,15 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,11 +57,18 @@ import androidx.compose.runtime.setValue
 
 
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.serialization.json.Json
+import learningareproject.composeapp.generated.resources.Res
+import kotlin.math.log
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 
@@ -75,18 +92,27 @@ class MainActivity : ComponentActivity() {
 
 val sizeForImg = 40.dp
 
+
 // ─── App Einstiegspunkt ──────────────────────────────────────────────────────
 
 @Composable
 fun App(vm: GameViewModel = viewModel()) {
-    mainScreen()
-    createTileSet(vm.allTiles)
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        mainScreen()
+        createTileSet(vm.allTiles)
 
-        createBtns(vm.allTiles)
+        // Buttons ganz oben im Z-Stack
+        Column(
+            modifier = Modifier
+                .padding(top = 30.dp)
+                .align(Alignment.TopCenter)
+                .zIndex(10f),  // ← liegt über allem
+
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+//            createBtns(vm.allTiles)
+            dropDownMenu()
+        }
     }
 }
 
@@ -98,38 +124,37 @@ fun createBtns(allTiles: MutableList<Tile>) {
     val loader = LaoderForTile()
     var savedLevels by remember { mutableStateOf(loader.getAllSavedLevels(context)) }
 
-    var i=1
-
     // Dialog-State
     var showSaveDialog by remember { mutableStateOf(false) }
     var levelName by remember { mutableStateOf("") }
 
     Column {
-        Button(onClick = { showSaveDialog = true }) {
-            Text("Speichern")
+        Button(onClick = {
+
+            Log.d("Btn", "es wurde auf speichern gedrückt ")
+            showSaveDialog = true })
+        {
+
+            Text("Speichern")  //TODO:Den speichern btn von der logik der anderen lvl btns trennen
         }
 
-        savedLevels.forEach { name ->
-            Button(onClick = { loader.loadGrid(context, name, allTiles) },//TODO:Den safe button gestalten sieht komsich aus
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Blue,        // Hintergrundfarbe
-                    contentColor = Color.Black         // Text/Icon Farbe
-                )
-            )
-            {
-                Text("$i $name")
-                i++
-
-                //TODO:Maybe alles in eine Box wrappen aber nur das Icon und der Button damit der Buton ne eigene grösse hat?
-                Button(onClick = {} , modifier = Modifier.size(10.dp)) { //TODO: 10 ist zu klein und 50 sieht man erst das icon ist aber dann zu gross die click fläche
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Löschen",
-                            tint=Color.Red
-                    )
-                }
-            }
-        }
+//Lvl loader mehtoden abschnitt
+//        savedLevels?.forEach { name ->
+//            Button(onClick = { loader.loadGrid(context, name, allTiles)
+//                             /*Hier die mehtode rein tun damit der lvl name in das textfield oben geht*/
+//                             },//TODO:Den safe button gestalten sieht komsich aus
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color.Blue,        // Hintergrundfarbe
+//                    contentColor = Color.Black         // Text/Icon Farbe
+//                )
+//            )
+//            {
+//
+//                Text("$levelName")
+//
+//            }
+//
+//         }
     }
 
     // Speichern-Dialog
@@ -154,19 +179,20 @@ fun createBtns(allTiles: MutableList<Tile>) {
                     onClick = {
                         if (levelName.isNotBlank()) {
                             loader.saveGrid(context, allTiles, levelName)
-                            savedLevels = loader.getAllSavedLevels(context)
+//                            savedLevels = loader.getAllSavedLevels(context)
                             showSaveDialog = false
                             levelName = ""
                         }
                     }
                 ) {
+
                     Text("Speichern")
                 }
             },
             dismissButton = {
                 OutlinedButton(onClick = {
                     showSaveDialog = false
-                    levelName = ""
+//                    levelName = ""
                 }) {
                     Text("Abbrechen")
                 }
@@ -231,5 +257,76 @@ fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>) {
         maus.moveMouse(435, 1095)
     }
 }
+
+
+@Composable
+fun dropDownMenu(vm: GameViewModel = viewModel()){
+    var expandBool = remember { mutableStateOf(false) }
+//    var gridList by remember { mutableStateOf(listOf<String>("h","b","c","b")) }
+    var selectedDataGrid = remember { mutableStateOf("") }
+    var textfiledSize by remember { mutableStateOf(Size.Zero) }
+
+    //ToogleSwitch
+    val iconToggle= if(expandBool.value){
+        Icons.Filled.KeyboardArrowUp
+    }else{
+        Icons.Filled.KeyboardArrowDown
+    }
+
+    Column(modifier = Modifier.padding(20.dp)) {
+    OutlinedTextField(
+            value = selectedDataGrid.value,
+            onValueChange = {selectedDataGrid.value=it},
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    textfiledSize = coordinates.size.toSize()
+                },
+            label = {Text(text="Level auswählen")},
+            trailingIcon = {
+                Icon(iconToggle, "", Modifier.clickable { expandBool.value = !expandBool.value })
+            }
+        )
+
+        DropdownMenu(
+            expanded=expandBool.value,
+            onDismissRequest = {expandBool.value=false},
+            modifier = Modifier
+                .width(with(LocalDensity.current){textfiledSize.width.toDp()})
+        ) {
+
+gridLadenButtons(vm.allTiles,enabledState=expandBool,selectedDataGrid)
+
+        }
+    }
+}
+
+//Ziel: die laden buttons mit den dropdown verbinden->fertig
+@Composable
+fun gridLadenButtons(allTiles: MutableList<Tile>,enabledState: MutableState<Boolean>,titel:MutableState<String>){
+    createBtns(allTiles)
+//Lvl loader mehtoden abschnitt
+    val context = LocalContext.current
+    val loader = LaoderForTile()
+    var savedLevels by remember { mutableStateOf(loader.getAllSavedLevels(context)) }
+
+    savedLevels.forEach { label ->
+        Log.d("Btn", "createBtns: hier ist die liste gridList:${savedLevels.size} es wurde grade $label hinuzugefügt")
+        DropdownMenuItem(
+            { Text(text=label) },
+            onClick = {
+                loader.loadGrid(context, label, allTiles)
+enabledState.value= !enabledState.value
+                titel.value=label
+            })
+    }
+
+         }
+
+//Das hab ich gelernt: Man kann in den function parameter datentypen übergeben wenn sie ein mutableState haben
+// und mit
+// dasObjectZumÄndern.value="GeänderterText"
+//ändern es ist dann immer noch das selbe objeckt es wird kein neues erzeugt oder so
+
 
 

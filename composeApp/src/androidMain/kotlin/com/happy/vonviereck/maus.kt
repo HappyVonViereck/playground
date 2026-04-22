@@ -60,7 +60,7 @@ class Maus {
         }
     }
 
-    fun moveMouse(targetX: Int, targetY: Int) {
+    fun moveMouse(targetX: Int, targetY: Int) { //TODO: DIe Maus kann über hindernisse gehen weil sie nichte jede koordinare voher checkt sondern nur die ZielCoordinate
         xCordPos = targetX
         yCordPos = targetY
     }
