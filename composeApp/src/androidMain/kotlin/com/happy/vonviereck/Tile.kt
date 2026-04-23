@@ -49,13 +49,12 @@ class Tile {
     var xCord = 0 //für grid
     var yCord = 0  //für grid
 
-
     var xCordPos = 0 //BildschirmPosition in pixelGenau
     var yCordPos = 0 //BildschirmPosition in pixelGenau
 
     var currentImageRes by mutableStateOf(R.drawable.tileboden23542352)  //Der originalTile kann aber zu hinderniss werden -> mutableStateOF wird dann benötigt weil man es ändert
     var darfGehen = true //Bool zum überprüfen ob man das Tile betreten darf
-    var isInEditMode = true
+    var isInEditMode by mutableStateOf (false)
 
 
     //Kurze Zusammenfassung: Es wird ein Img von den TIle erstellt mit nen Button drinne der aber unsichtbar gemacht wird(funktioniert)
@@ -64,7 +63,7 @@ class Tile {
     // und nicht jedes Tile seine eigene erzeugt
 
     @Composable
-    fun createATile(maus: Maus) {
+    fun createATile(maus: Maus,allTiles: MutableList<Tile>) {
         val painter = painterResource(currentImageRes)
         Box(
             modifier = Modifier //Die Box wird benötigt damit man mehrer ui elemente zusammenfügen kann
@@ -83,13 +82,13 @@ class Tile {
             )
             Button( //2.UIElement aber unsichtbar
                 onClick = {
-                    if (darfGehen == false) { //Kontrolle ob die Maus sich bewegen darf
+                    if (darfGehen == false||isInEditMode) { //Kontrolle ob die Maus sich bewegen darf
                         Log.d(
                             "Maus",
                             "Dieses Feld(xCord=$xCordPos, yCord=$yCordPos)  darf nicht betretren werden! Bewegung abgebrochem"
                         )
                     } else {
-                        maus.moveMouse(xCordPos, yCordPos)
+//                        maus.moveMouse(xCordPos, yCordPos, allTiles )
                         Log.d("Tile", "Dies Tile darf betreten werden: $darfGehen")
                         Log.d("Tile", "POSITION: xCord=$xCordPos, yCord=$yCordPos")
 

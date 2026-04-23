@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
@@ -32,6 +35,7 @@ import kotlin.math.roundToInt
 class Maus {
     var xCordPos by mutableStateOf(0)
     var yCordPos by mutableStateOf(0)
+    var currentTile by mutableStateOf<Tile?>(null)
 
     @Composable
     fun createMaus() {
@@ -48,10 +52,7 @@ class Maus {
             modifier = Modifier
                 .size(50.dp)
                 .offset { IntOffset(animatedX.value.toInt(), animatedY.value.toInt()) }
-                .onGloballyPositioned {
-                    it.positionInRoot()
-
-                }) {
+        ) {
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter = painter,
@@ -60,8 +61,17 @@ class Maus {
         }
     }
 
-    fun moveMouse(targetX: Int, targetY: Int) { //TODO: DIe Maus kann über hindernisse gehen weil sie nichte jede koordinare voher checkt sondern nur die ZielCoordinate
+    fun moveMouse(targetX: Int, targetY: Int, allTiles: List<Tile> = emptyList(), tileSize: Int = 40) {
+        val targetTile = allTiles.find { tile ->
+            targetX >= tile.xCordPos &&
+                    targetX <= tile.xCordPos + tileSize &&
+                    targetY >= tile.yCordPos &&
+                    targetY <= tile.yCordPos + tileSize
+        }
         xCordPos = targetX
         yCordPos = targetY
+        currentTile = targetTile
+        Log.d("Maus", "Bewegt auf Tile: (${currentTile?.xCord}, ${currentTile?.yCord})")
+        Log.d("Maus", "Bewegt auf Tile:GlobalePosition: (${currentTile?.xCordPos}, ${currentTile?.yCordPos})")
     }
 }
