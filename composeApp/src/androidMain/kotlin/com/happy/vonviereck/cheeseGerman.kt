@@ -13,22 +13,28 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 
-class cheeseGerman {
-    var xCordPos by mutableStateOf(0)
-    var yCordPos by mutableStateOf(0)
-    var currentTile by mutableStateOf<Tile?>(null)
-
-
+class cheeseGerman: gridObjeckte() {
     @Composable
     fun createCheese() {
         val painter = painterResource(R.drawable.germancheese)
+        val animatedX = remember { Animatable(xCordPos.toFloat()) }
+        val animatedY = remember { Animatable(yCordPos.toFloat()) }
+
+        LaunchedEffect(xCordPos, yCordPos) {
+            animatedX.animateTo(xCordPos.toFloat())
+            animatedY.animateTo(yCordPos.toFloat())
+        }
         Box(
             modifier = Modifier
                 .size(50.dp)
+                .offset { IntOffset(animatedX.value.toInt(), animatedY.value.toInt()) }
                ) {
             Image(
                 modifier = Modifier.fillMaxSize(),
@@ -37,9 +43,10 @@ class cheeseGerman {
             )
         }
     }
-
 }
 
 //platziere Käse
 //KäseErreicht bool
 //kann erreichtwerden bool
+//käse platzieren irgndwo
+//Zuschauer modus aktivieren

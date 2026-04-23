@@ -44,11 +44,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
-
+//Ein viewmodel ist so zu sagen eine box wo man varibalen abstellen kann
+// und man dann die box holt kann man drauf zugreifen mit ver mehtoden,
+//Das heisst man kann mit mehrern mehtoden die varibalen /werte verändern man muss nur das viewmodel
+//an die methode weitergeben
 class GameViewModel : ViewModel() {
     val allTiles = mutableListOf<Tile>()
     val maus = Maus()
     val germanCheese= cheeseGerman()
+    val tileSize = 40.dp
 }
 
 // ─── Activity ────────────────────────────────────────────────────────────────
@@ -62,18 +66,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-// ─── Konstanten ──────────────────────────────────────────────────────────────
-
-val sizeForImg = 40.dp
-
 // ─── App Einstiegspunkt ──────────────────────────────────────────────────────
 
 @Composable
 fun App(vm: GameViewModel = viewModel()) {
+
+    LaunchedEffect(vm.allTiles.size) {
+        // Wird aufgerufen sobald Tiles hinzugefügt wurden
+        if (vm.allTiles.size >= 100) { // 10x10 = 100 Tiles
+            vm.maus.moveTo(1, 1, vm.allTiles)
+            vm.germanCheese.moveTo(2, 2, vm.allTiles)
+            Log.d("Debug", "Startpositionen gesetzt")
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()){
         mainScreen()
-
     Box(modifier = Modifier.padding(top = 150.dp))
         {
         Column(
@@ -86,17 +94,13 @@ fun App(vm: GameViewModel = viewModel()) {
             Row(horizontalArrangement = Arrangement.Start) {
                 createSavebtn(vm.allTiles)
                 changetilesBtn(vm.allTiles)
-                knopf(vm.maus)
+                knopf(vm)
             }
-            createTileSet(vm.allTiles, vm.maus)
-
+            createTileSet(vm)
         }
-
-
     }
-        // 2. Maus ganz am Ende → liegt automatisch über allem
+        // hier alle anderen elemente die globale position brauchen
         vm.maus.createMaus()
-        vm.maus.moveMouse(120, 1109)
         vm.germanCheese.createCheese()
 }
 }
@@ -112,46 +116,69 @@ fun createSavebtn(allTiles: MutableList<Tile>) {
     var showSaveDialog by remember { mutableStateOf(false) }
     var levelName by remember { mutableStateOf("") }
 
-    Button(onClick = {
-        Log.d("Btn", "es wurde auf speichern gedrückt ")
-        showSaveDialog = true
-    }) {
-        Text("Speichern")  //TODO:Den speichern btn von der logik der anderen lvl btns trennen
-    }
+    Button(
+        onClick =
+            {
+                Log.d("Btn", "es wurde auf speichern gedrückt ")
+                showSaveDialog = true  //Trigger für den SpeicherAlert(DialogBox)
+            })
+    { Text("Speichern") }
+
 
     // Speichern-Dialog
-    if (showSaveDialog) {
-        AlertDialog(onDismissRequest = {
-            showSaveDialog = false
-            levelName = ""
-        }, title = { Text("Level benennen") }, text = {
-            OutlinedTextField(
-                value = levelName,
-                onValueChange = { levelName = it },
-                label = { Text("Level-Name") },
-                singleLine = true,
-                placeholder = { Text("z.B. level1") })
-        }, confirmButton = {
-            Button(
-                onClick = {
-                    if (levelName.isNotBlank()) {
-                        loader.saveGrid(context, allTiles, levelName)
-                        showSaveDialog = false
-                        levelName = ""
-                    }
-                }) {
-                Text("Speichern")
-            }
-        }, dismissButton = {
-            OutlinedButton(onClick = {
+    if (showSaveDialog) { //wenn der trigger von knopf auf true ist wird der alert ausgelöst
+        AlertDialog(
+            onDismissRequest = {
                 showSaveDialog = false
-            }) {
-                Text("Abbrechen")
-            }
-        })
+                levelName = ""
+            },
+            title = { Text("Level benennen") },
+            text = {
+                OutlinedTextField(
+                    value = levelName,
+                    onValueChange = { levelName = it },
+                    label = { Text("Level-Name") },
+                    singleLine = true,
+                    placeholder = { Text("z.B. level1") })
+            },
+            confirmButton = { //Der knopf zum bestätigen wurde gedrückt
+                Button(
+                    onClick = {
+                        if (levelName.isNotBlank()) {
+                            loader.saveGrid(context, allTiles, levelName)
+                            showSaveDialog = false
+                            levelName = "" //leert die textbox damit man beim nächten levelbennen
+                                           // eine freie Textbox hat
+                        }
+                    }) { Text("Speichern") }
+            },
+            dismissButton =
+                {
+                    OutlinedButton(onClick = { showSaveDialog = false })//Der Vorgang wird abgerochen
+                    { Text("Abbrechen") }
+                })
     }
 }
 
+@Composable
+fun gridLadenButtons(
+    allTiles: MutableList<Tile>, enabledState: MutableState<Boolean>, titel: MutableState<String>
+) {
+    val context = LocalContext.current
+    val loader = LaoderForTile()
+    var savedLevels by remember { mutableStateOf(loader.getAllSavedLevels(context)) }
+
+    savedLevels.forEach { label ->
+        Log.d("Btn","es wurde grade das Level $label hinuzugefügt")
+
+        DropdownMenuItem({ Text(text = label) },
+            onClick = {
+            loader.loadGrid(context, label, allTiles)
+            enabledState.value = !enabledState.value
+            titel.value = label
+        })
+    }
+}
 @Composable
 fun changetilesBtn(allTiles: MutableList<Tile>){
 
@@ -167,7 +194,7 @@ fun changetilesBtn(allTiles: MutableList<Tile>){
 }
 
 @Composable
-fun knopf(maus: Maus) {
+fun knopf(vm: GameViewModel) {
     Log.d("cheese", "knopf: Käase soll gefudnen werden starten")
     var start = remember { mutableStateOf(false) }
     Button(onClick = {
@@ -177,38 +204,34 @@ fun knopf(maus: Maus) {
     ){
         Text("Käse finden")
     }
-    bewegenMaustest(start,maus)
+    bewegenMaustest(start,vm)
 }
 
 @Composable
-fun bewegenMaustest(start: MutableState<Boolean>,maus: Maus){
+fun bewegenMaustest(start: MutableState<Boolean>,vm: GameViewModel){
     if (start.value) {
         Log.d("cheese", "Käase soll gefudnen werden start ist true")
         LaunchedEffect(Unit) {
-            maus.moveMouse(120, 1109)
+            vm.maus.moveTo(6, 2,vm.allTiles)
             delay(2000L)
-            maus.moveMouse(225, 1305)
+            vm.maus.moveTo(7, 2,vm.allTiles)
             delay(2000L)
-            maus.moveMouse(750, 1410)
+            vm.maus.moveTo(8, 2,vm.allTiles)
             delay(2000L)
         }
     }
 }
-    //käse platzieren irgndwo
-    //maus bewegen
-    //Zuschauer modus aktivieren
-
 // ─── TileSet ─────────────────────────────────────────────────────────────────
 
 @Composable
-fun createTileSet(allTiles: MutableList<Tile>, maus: Maus) {
-        HorizontalGrid(rows = 10, columns = 10, allTiles = allTiles, maus)
+fun createTileSet(vm: GameViewModel) {
+        HorizontalGrid( 10, 10,  vm.allTiles, vm.maus,vm)
 }
 
-// ─── Grid + Maus ─────────────────────────────────────────────────────────────
+// ─── Grid ─────────────────────────────────────────────────────────────
 
 @Composable
-fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: Maus) {
+fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: Maus,vm: GameViewModel) {
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -231,7 +254,7 @@ fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: M
                                 containerColor = MaterialTheme.colorScheme.onSurfaceVariant
                             ),
                             shape = CutCornerShape(0.dp),
-                            modifier = Modifier.size(sizeForImg)
+                            modifier = Modifier.size(vm.tileSize.value.dp)
                         ) {
                             // Rand-Tiles als Mauer setzen
                             if (col == 0 || col == columns - 1 || row == 0 || row == rows - 1) {
@@ -246,7 +269,7 @@ fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: M
     }
 
 
-
+//───────DropDownMenu ─────────────────────────────────────────────────────────────
 @Composable
 fun dropDownMenu(vm: GameViewModel = viewModel()) {
     var expandBool = remember { mutableStateOf(false) }
@@ -285,29 +308,7 @@ fun dropDownMenu(vm: GameViewModel = viewModel()) {
 }
 
 
-@Composable
-fun gridLadenButtons(
-    allTiles: MutableList<Tile>, enabledState: MutableState<Boolean>, titel: MutableState<String>
-) {
 
-//Lvl loader mehtoden abschnitt
-    val context = LocalContext.current
-    val loader = LaoderForTile()
-    var savedLevels by remember { mutableStateOf(loader.getAllSavedLevels(context)) }
-
-    savedLevels.forEach { label ->
-        Log.d(
-            "Btn",
-            "createBtns: hier ist die liste gridList:${savedLevels.size} es wurde grade $label hinuzugefügt"
-        )
-        DropdownMenuItem({ Text(text = label) }, onClick = {
-            loader.loadGrid(context, label, allTiles)
-            enabledState.value = !enabledState.value
-            titel.value = label
-        })
-    }
-
-}
 //Ziel: die laden buttons mit den dropdown verbinden->fertig
 //Das hab ich gelernt: Man kann in den function parameter datentypen übergeben wenn sie ein mutableState haben
 // und mit

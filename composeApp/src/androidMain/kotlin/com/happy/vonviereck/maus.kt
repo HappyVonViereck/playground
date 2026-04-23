@@ -32,11 +32,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-class Maus {
-    var xCordPos by mutableStateOf(0)
-    var yCordPos by mutableStateOf(0)
-    var currentTile by mutableStateOf<Tile?>(null)
-
+class Maus : gridObjeckte(){
     @Composable
     fun createMaus() {
         val painter = painterResource(R.drawable.maus)
@@ -61,17 +57,19 @@ class Maus {
         }
     }
 
-    fun moveMouse(targetX: Int, targetY: Int, allTiles: List<Tile> = emptyList(), tileSize: Int = 40) {
-        val targetTile = allTiles.find { tile ->
-            targetX >= tile.xCordPos &&
-                    targetX <= tile.xCordPos + tileSize &&
-                    targetY >= tile.yCordPos &&
-                    targetY <= tile.yCordPos + tileSize
-        }
-        xCordPos = targetX
-        yCordPos = targetY
-        currentTile = targetTile
-        Log.d("Maus", "Bewegt auf Tile: (${currentTile?.xCord}, ${currentTile?.yCord})")
-        Log.d("Maus", "Bewegt auf Tile:GlobalePosition: (${currentTile?.xCordPos}, ${currentTile?.yCordPos})")
-    }
 }
+
+//Alter Code hänge aber emotional noch dran, weil es meine erste idee war aber noch nicht optimiert genug :c wähhh
+//    fun moveMouse(targetX: Int, targetY: Int, allTiles: List<Tile> = emptyList(), tileSize: Int = 40) {
+//        val targetTile = allTiles.find { tile ->
+//            targetX >= tile.xCordPos &&
+//                    targetX <= tile.xCordPos + tileSize &&
+//                    targetY >= tile.yCordPos &&
+//                    targetY <= tile.yCordPos + tileSize
+//        }
+//        xCordPos = targetX
+//        yCordPos = targetY
+//        currentTile = targetTile
+//        Log.d("Maus", "Bewegt auf Tile: (${currentTile?.xCord}, ${currentTile?.yCord})")
+//        Log.d("Maus", "Bewegt auf Tile:GlobalePosition: (${currentTile?.xCordPos}, ${currentTile?.yCordPos})")
+//    }
