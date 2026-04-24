@@ -53,6 +53,7 @@ class GameViewModel : ViewModel() {
     val maus = Maus()
     val germanCheese= cheeseGerman()
     val tileSize = 40.dp
+    var everythingisLoaded=false
 }
 
 // ─── Activity ────────────────────────────────────────────────────────────────
@@ -72,12 +73,11 @@ class MainActivity : ComponentActivity() {
 fun App(vm: GameViewModel = viewModel()) {
 
     LaunchedEffect(vm.allTiles.size) {
-        // Wird aufgerufen sobald Tiles hinzugefügt wurden
-        if (vm.allTiles.size >= 100) { // 10x10 = 100 Tiles
-            vm.maus.moveTo(1, 1, vm.allTiles)
-            vm.germanCheese.moveTo(2, 2, vm.allTiles)
-            Log.d("Debug", "Startpositionen gesetzt")
-        }
+if(vm.allTiles.size>=100) {
+    vm.maus.moveTo(1, 1, vm.allTiles)
+    vm.germanCheese.placeCheeseOnFreeTileRandom(vm)
+    Log.d("Debug", "Startpositionen gesetzt")
+}
     }
 
     Box(modifier = Modifier.fillMaxSize()){
@@ -95,8 +95,10 @@ fun App(vm: GameViewModel = viewModel()) {
                 createSavebtn(vm.allTiles)
                 changetilesBtn(vm.allTiles)
                 knopf(vm)
+                käsePlatzierenTestbtn(vm)
             }
             createTileSet(vm)
+
         }
     }
         // hier alle anderen elemente die globale position brauchen
@@ -161,9 +163,8 @@ fun createSavebtn(allTiles: MutableList<Tile>) {
 }
 
 @Composable
-fun gridLadenButtons(
-    allTiles: MutableList<Tile>, enabledState: MutableState<Boolean>, titel: MutableState<String>
-) {
+fun gridLadenButtons(allTiles: MutableList<Tile>, enabledState: MutableState<Boolean>, titel: MutableState<String>)
+ {
     val context = LocalContext.current
     val loader = LaoderForTile()
     var savedLevels by remember { mutableStateOf(loader.getAllSavedLevels(context)) }
@@ -195,7 +196,7 @@ fun changetilesBtn(allTiles: MutableList<Tile>){
 
 @Composable
 fun knopf(vm: GameViewModel) {
-    Log.d("cheese", "knopf: Käase soll gefudnen werden starten")
+    Log.d("cheese", "knopf: Käse soll gefudnen werden starten")
     var start = remember { mutableStateOf(false) }
     Button(onClick = {
         Log.d("cheese", "knopf wurde gedrückt")
@@ -210,7 +211,7 @@ fun knopf(vm: GameViewModel) {
 @Composable
 fun bewegenMaustest(start: MutableState<Boolean>,vm: GameViewModel){
     if (start.value) {
-        Log.d("cheese", "Käase soll gefudnen werden start ist true")
+
         LaunchedEffect(Unit) {
             vm.maus.moveTo(6, 2,vm.allTiles)
             delay(2000L)
@@ -221,6 +222,20 @@ fun bewegenMaustest(start: MutableState<Boolean>,vm: GameViewModel){
         }
     }
 }
+
+@Composable
+fun käsePlatzierenTestbtn(vm: GameViewModel){
+    Button(onClick = { vm.germanCheese.placeCheeseOnFreeTileRandom(vm)}){
+        Text("käse los")
+    }
+
+
+
+
+}
+
+
+
 // ─── TileSet ─────────────────────────────────────────────────────────────────
 
 @Composable
@@ -245,6 +260,11 @@ fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: M
                             Tile().also { tile ->
                                 tile.xCord = col
                                 tile.yCord = row
+
+                                // Rand-Tiles als Mauer setzen
+                                if (col == 0 || col == columns - 1 || row == 0 || row == rows - 1) {
+                                    tile.toggleTile()
+                                }
                                 allTiles.add(tile)
                             }
                         }
@@ -256,10 +276,6 @@ fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: M
                             shape = CutCornerShape(0.dp),
                             modifier = Modifier.size(vm.tileSize.value.dp)
                         ) {
-                            // Rand-Tiles als Mauer setzen
-                            if (col == 0 || col == columns - 1 || row == 0 || row == rows - 1) {
-                                LaunchedEffect(Unit) { tileBlock.toggleTile() }
-                            }
                             tileBlock.createATile(maus, allTiles)
                         }
                     }

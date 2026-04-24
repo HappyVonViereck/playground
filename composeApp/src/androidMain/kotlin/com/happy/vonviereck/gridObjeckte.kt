@@ -11,43 +11,30 @@ open class gridObjeckte {
     var yCordPos by mutableStateOf(0)
     var currentTile by mutableStateOf<Tile?>(null)
 
-    fun sucheTile(xCord: Int, yCord: Int, allTiles: List<Tile>): Tile {
+    fun sucheTile(xCord: Int, yCord: Int, allTiles: List<Tile>): Tile? {
 
         val tile = allTiles.find { it.xCord == xCord && it.yCord == yCord }
 
-        var failtile = Tile()
-        failtile.xCord = -1
-        failtile.yCord = -1
-
         if (tile == null) {
             Log.d("GridObject", "Tile ($xCord, $yCord) nicht gefunden")
-            return failtile
+        } else {
+            Log.d("GridObject", "Tile gefunden: (${tile.xCord}, ${tile.yCord})")
         }
 
-        Log.d("GridObject", "Tile gefunden: (${tile.xCord}, ${tile.yCord})")
         return tile
     }
-
     fun moveTo(xCord: Int, yCord: Int, allTiles: List<Tile>): Boolean {
-        val tile = sucheTile(xCord, yCord, allTiles)
+        val tile = sucheTile(xCord, yCord, allTiles) ?: return false
 
-        if (!tile.darfGehen &&
-            tile.xCord != -1 &&
-            tile.yCord != -1
-        ) {
+        if (!tile.darfGehen) {
             Log.d("GridObject", "Tile ($xCord, $yCord) ist eine Wand")
             return false
         }
-        if (tile.xCord != -1 && tile.yCord != -1)
 
-            xCordPos = tile.xCordPos
-            yCordPos = tile.yCordPos
-            currentTile = tile
+        xCordPos = tile.xCordPos
+        yCordPos = tile.yCordPos
+        currentTile = tile
+        return true
+    }
 
-            Log.d(
-                "GridObject",
-                "${this::class.simpleName} bewegt zu (${tile.xCord}, ${tile.yCord})"
-            )
-            return true
-        }
     }

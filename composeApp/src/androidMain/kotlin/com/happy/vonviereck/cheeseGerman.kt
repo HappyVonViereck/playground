@@ -1,5 +1,6 @@
 package com.happy.vonviereck
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.random.Random
 
 class cheeseGerman: gridObjeckte() {
     @Composable
@@ -43,8 +45,27 @@ class cheeseGerman: gridObjeckte() {
             )
         }
     }
-}
 
+
+fun placeCheeseOnFreeTileRandom(vm: GameViewModel){
+    val freeTiles = vm.allTiles.filter { it.darfGehen }
+
+    freeTiles.forEach { free->
+        Log.d("Cheese","Tile(${free.xCord}, ${free.yCord}) ist angeblich keine wand darfgehen ist:${free.darfGehen}")
+    }
+
+    if (freeTiles.isEmpty()) {
+        Log.d("Cheese", "Keine freien Tiles gefunden")
+        return
+    }
+
+    val randomTile = freeTiles.random()
+    moveTo(randomTile.xCord, randomTile.yCord, vm.allTiles)
+    Log.d("Cheese", "Käse platziert auf (${randomTile.xCord}, ${randomTile.yCord}) der status von darf gehen ist:${randomTile.darfGehen}")
+
+
+}
+}
 //platziere Käse
 //KäseErreicht bool
 //kann erreichtwerden bool
