@@ -60,7 +60,7 @@ class GameViewModel : ViewModel() {
 }
 
 // ─── Activity ────────────────────────────────────────────────────────────────
-
+// hallo leute
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
