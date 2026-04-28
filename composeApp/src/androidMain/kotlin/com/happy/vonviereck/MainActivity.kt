@@ -45,6 +45,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 import kotlinx.coroutines.delay
 
+
+
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 //Ein viewmodel ist so zu sagen eine box wo man varibalen abstellen kann
 // und man dann die box holt kann man drauf zugreifen mit ver mehtoden,
@@ -104,7 +106,7 @@ if(vm.allTiles.size>=100) {
 
         }
     }
-        // hier alle anderen elemente die globale position brauchen
+
         vm.maus.createMaus()
         vm.germanCheese.createCheese()
 }
