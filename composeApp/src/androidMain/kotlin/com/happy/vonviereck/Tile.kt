@@ -82,18 +82,6 @@ class Tile {
             )
             Button( //2.UIElement aber unsichtbar
                 onClick = {
-                    if (darfGehen == false||isInEditMode) { //Kontrolle ob die Maus sich bewegen darf
-                        Log.d(
-                            "Maus",
-                            "Dieses Feld(xCord=$xCordPos, yCord=$yCordPos)  darf nicht betretren werden! Bewegung abgebrochem"
-                        )
-                    } else {
-//                        maus.moveMouse(xCordPos, yCordPos, allTiles )
-                        Log.d("Tile", "Dies Tile darf betreten werden: $darfGehen")
-                        Log.d("Tile", "POSITION: xCord=$xCordPos, yCord=$yCordPos")
-
-                    }
-
                     if (isInEditMode) {
                         toggleTile()
                     }
