@@ -20,6 +20,7 @@ composeFoundation = "1.6.0"
 foundation = "1.10.6"
 material3Version = "1.4.0"
 uiGeometry = "1.10.6"
+room3CommonJvm = "3.0.0-alpha03"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -46,6 +47,7 @@ androidx-compose-foundation = { group = "androidx.wear.compose", name = "compose
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3Version" }
 androidx-compose-ui-geometry = { group = "androidx.compose.ui", name = "ui-geometry", version.ref = "uiGeometry" }
+androidx-room3-common-jvm = { group = "androidx.room3", name = "room3-common-jvm", version.ref = "room3CommonJvm" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

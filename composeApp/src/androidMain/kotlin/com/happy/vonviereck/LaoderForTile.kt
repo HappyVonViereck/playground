@@ -49,4 +49,14 @@ class LaoderForTile {
             ?.map { it.nameWithoutExtension }
             ?: emptyList()
     }
+
+    fun deleteGrid(context: Context, gridName: String) {
+        val file = File(context.filesDir, "$gridName.json")
+        if (file.exists()) {
+            file.delete()
+            Log.d("Grid", "Grid gelöscht: $gridName")
+        } else {
+            Log.d("Grid", "Datei nicht gefunden: $gridName")
+        }
+    }
 }

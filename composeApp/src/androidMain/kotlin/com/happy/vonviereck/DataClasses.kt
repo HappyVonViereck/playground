@@ -15,3 +15,9 @@ data class GridData(
     val tiles: List<TileData>
 )
 
+
+@Serializable
+data class pathData(
+val tilesInpath:List<TileData>,
+val amountOftiles:Int=0,
+)

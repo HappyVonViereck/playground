@@ -34,6 +34,8 @@ open class gridObjeckte {
         xCordPos = tile.xCordPos
         yCordPos = tile.yCordPos
         currentTile = tile
+
+        Log.d("Path","Das Tile ($xCord, $yCord) wurde erreicht")
         return true
     }
 

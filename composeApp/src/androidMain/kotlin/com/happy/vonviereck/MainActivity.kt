@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.ui.Alignment
@@ -41,6 +42,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+
 import kotlinx.coroutines.delay
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
@@ -50,6 +52,7 @@ import kotlinx.coroutines.delay
 //an die methode weitergeben
 class GameViewModel : ViewModel() {
     val allTiles = mutableListOf<Tile>()
+    var currentPath = mutableStateOf<List<Tile>>(emptyList())
     val maus = Maus()
     val germanCheese= cheeseGerman()
     val tileSize = 40.dp
@@ -74,7 +77,7 @@ fun App(vm: GameViewModel = viewModel()) {
 
     LaunchedEffect(vm.allTiles.size) {
 if(vm.allTiles.size>=100) {
-    vm.maus.moveTo(1, 1, vm.allTiles)
+    vm.maus.moveTo(7, 5, vm.allTiles)
     vm.germanCheese.placeCheeseOnFreeTileRandom(vm)
     Log.d("Debug", "Startpositionen gesetzt")
 }
@@ -106,6 +109,9 @@ if(vm.allTiles.size>=100) {
         vm.germanCheese.createCheese()
 }
 }
+
+
+
 // ─── Buttons ─────────────────────────────────────────────────────────────────
 
 @Composable
@@ -170,14 +176,34 @@ fun gridLadenButtons(allTiles: MutableList<Tile>, enabledState: MutableState<Boo
     var savedLevels by remember { mutableStateOf(loader.getAllSavedLevels(context)) }
 
     savedLevels.forEach { label ->
-        Log.d("Btn","es wurde grade das Level $label hinuzugefügt")
+        DropdownMenuItem(
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = label)
 
-        DropdownMenuItem({ Text(text = label) },
+                    // Delete-Button
+                    IconButton(onClick = {
+                        loader.deleteGrid(context, label)
+                        savedLevels = loader.getAllSavedLevels(context) // Liste aktualisieren
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Löschen",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            },
             onClick = {
-            loader.loadGrid(context, label, allTiles)
-            enabledState.value = !enabledState.value
-            titel.value = label
-        })
+                loader.loadGrid(context, label, allTiles)
+                enabledState.value = false
+                titel.value = label
+            }
+        )
     }
 }
 @Composable
@@ -206,22 +232,20 @@ fun knopf(vm: GameViewModel) {
         Text("Käse finden")
     }
     bewegenMaustest(start,vm)
+    goAPath(vm, vm.currentPath.value)
 }
 
-@Composable
 fun bewegenMaustest(start: MutableState<Boolean>,vm: GameViewModel){
     if (start.value) {
 
-        LaunchedEffect(Unit) {
-            vm.maus.moveTo(6, 2,vm.allTiles)
-            delay(2000L)
-            vm.maus.moveTo(7, 2,vm.allTiles)
-            delay(2000L)
-            vm.maus.moveTo(8, 2,vm.allTiles)
-            delay(2000L)
-        }
+        val aTile = vm.maus.sucheTile(7, 5, vm.allTiles)
+        val bTile = vm.maus.sucheTile(4, 1, vm.allTiles)
+
+        vm.currentPath.value = createAPath(aTile, bTile, vm)
+        start.value = false
     }
-}
+    }
+
 
 @Composable
 fun käsePlatzierenTestbtn(vm: GameViewModel){
@@ -284,7 +308,6 @@ fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: M
         }
     }
 
-
 //───────DropDownMenu ─────────────────────────────────────────────────────────────
 @Composable
 fun dropDownMenu(vm: GameViewModel = viewModel()) {
@@ -323,7 +346,59 @@ fun dropDownMenu(vm: GameViewModel = viewModel()) {
     }
 }
 
+//───────pathFinding ─────────────────────────────────────────────────────────────
 
+fun createAPath(tileA: Tile?, tileB: Tile?, vm: GameViewModel): List<Tile> {
+
+
+    if (tileA == null || tileB == null) {
+        return emptyList()
+    }
+
+    val path = mutableListOf<Tile>()
+
+    // Schritt 1: Erst horizontal von A.x bis B.x (auf A.y bleiben)
+    val xRange = if (tileA.xCord <= tileB.xCord) {
+        tileA.xCord..tileB.xCord
+    } else {
+        tileA.xCord downTo tileB.xCord
+    }
+
+    for (x in xRange) {
+        val tile = vm.allTiles.find { it.xCord == x && it.yCord == tileA.yCord }
+        if (tile != null) {
+            path.add(tile)
+        }
+    }
+
+    // Schritt 2: Dann vertikal von A.y bis B.y (auf B.x bleiben)
+    val yRange = if (tileA.yCord <= tileB.yCord) {
+        (tileA.yCord + 1)..tileB.yCord   // +1 damit Ecke nicht doppelt
+    } else {
+        (tileA.yCord - 1) downTo tileB.yCord
+    }
+
+    for (y in yRange) {
+        val tile = vm.allTiles.find { it.xCord == tileB.xCord && it.yCord == y }
+        if (tile != null) path.add(tile)
+    }
+
+    path.forEach { t->
+        Log.d("path","path besteht aus Tile(${t.xCord},${t.yCord})")
+    }
+
+    return path
+}
+@Composable
+fun goAPath(vm: GameViewModel,l:List<Tile>){
+
+        LaunchedEffect(l) {
+            l.forEach { tile ->
+            vm.maus.moveTo(tile.xCord, tile.yCord, vm.allTiles)
+            delay(500L)
+        }
+    }
+}
 
 //Ziel: die laden buttons mit den dropdown verbinden->fertig
 //Das hab ich gelernt: Man kann in den function parameter datentypen übergeben wenn sie ein mutableState haben
