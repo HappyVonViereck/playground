@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.unit.dp
@@ -25,18 +26,18 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun mainScreen() {
-val infiniteTransition= rememberInfiniteTransition()
+    val infiniteTransition = rememberInfiniteTransition()
 
     val rotationScale by infiniteTransition.animateFloat(
         initialValue = 0f, targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween (500), RepeatMode.Reverse)
+        animationSpec = infiniteRepeatable(tween(500), RepeatMode.Reverse)
     )
     val scale by infiniteTransition.animateFloat(
         initialValue = 0.5f, targetValue = 1.3f,
-        animationSpec = infiniteRepeatable(tween (1000), RepeatMode.Reverse)
+        animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse)
     )
 
-    val brush=linearGradient(
+    val brush = linearGradient(
         colors = listOf(
             Color(0x404A051C),
             Color(0xFF06AED5),
@@ -45,12 +46,12 @@ val infiniteTransition= rememberInfiniteTransition()
             Color(0xFFEE4B6A),
         )
     )
-        Image(
-            painter = painterResource(id = R.drawable.homescrreeeam),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop // or ContentScale.Fit
-        )
+    Image(
+        painter = painterResource(id = R.drawable.homescrreeeam),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop // or ContentScale.Fit
+    )
 
     Text(
         modifier = Modifier
@@ -66,6 +67,6 @@ val infiniteTransition= rememberInfiniteTransition()
             textMotion = TextMotion.Animated,
             fontSize = 30.sp
         ),
-        text = "Mausegards Abenteuer"
+        text = stringResource(R.string.app_name)
     )
 }
