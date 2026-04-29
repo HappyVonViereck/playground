@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,8 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-
-
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -42,7 +39,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-
 import kotlinx.coroutines.delay
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
@@ -222,10 +218,10 @@ fun changetilesBtn(allTiles: MutableList<Tile>){
 
 @Composable
 fun knopf(vm: GameViewModel) {
-    Log.d("cheese", "knopf: Käse soll gefudnen werden starten")
+
     var start = remember { mutableStateOf(false) }
     Button(onClick = {
-        Log.d("cheese", "knopf wurde gedrückt")
+        Log.d("Debug", "Knopf zum testen wurde gedrückt")
         start.value = true
     }
     ){
@@ -252,22 +248,14 @@ fun käsePlatzierenTestbtn(vm: GameViewModel){
     Button(onClick = { vm.germanCheese.placeCheeseOnFreeTileRandom(vm)}){
         Text("käse los")
     }
-
-
-
-
 }
 
-
-
-// ─── TileSet ─────────────────────────────────────────────────────────────────
+// ─── Grid ─────────────────────────────────────────────────────────────────
 
 @Composable
 fun createTileSet(vm: GameViewModel) {
         HorizontalGrid( 10, 10,  vm.allTiles, vm.maus,vm)
 }
-
-// ─── Grid ─────────────────────────────────────────────────────────────
 
 @Composable
 fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: Maus,vm: GameViewModel) {
@@ -300,7 +288,7 @@ fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: M
                             shape = CutCornerShape(0.dp),
                             modifier = Modifier.size(vm.tileSize.value.dp)
                         ) {
-                            tileBlock.createATile(maus, allTiles)
+                            tileBlock.createATile()
                         }
                     }
                 }

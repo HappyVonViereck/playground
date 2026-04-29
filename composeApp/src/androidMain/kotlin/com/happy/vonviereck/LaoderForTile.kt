@@ -20,7 +20,7 @@ class LaoderForTile {
     fun loadGrid(context: Context, gridName: String, tiles: List<Tile>) {
         val file = File(context.filesDir, "$gridName.json")
         if (!file.exists()) {
-            Log.d("Grid", "Keine Datei gefunden: $gridName")
+            Log.d("LevelManager", "Keine Datei gefunden: $gridName")
             return
         }
 
@@ -39,7 +39,7 @@ class LaoderForTile {
             }
         }
 
-        Log.d("Grid", "Grid geladen: $gridName")
+        Log.d("LevelManager", "Level geladen: $gridName")
     }
 
     // Gibt alle gespeicherten Level-Namen zurück
@@ -54,9 +54,9 @@ class LaoderForTile {
         val file = File(context.filesDir, "$gridName.json")
         if (file.exists()) {
             file.delete()
-            Log.d("Grid", "Grid gelöscht: $gridName")
+            Log.d("LevelManager", "Level gelöscht: $gridName")
         } else {
-            Log.d("Grid", "Datei nicht gefunden: $gridName")
+            Log.d("LevelManager", "Level nicht gefunden: $gridName")
         }
     }
 }

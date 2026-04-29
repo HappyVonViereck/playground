@@ -27,7 +27,7 @@ open class gridObjeckte {
         val tile = sucheTile(xCord, yCord, allTiles) ?: return false
 
         if (!tile.darfGehen) {
-            Log.d("GridObject", "Tile ($xCord, $yCord) ist eine Wand")
+            Log.d("Path", "Tile ($xCord, $yCord) ist eine Wand")
             return false
         }
 
