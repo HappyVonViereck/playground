@@ -7,7 +7,7 @@ import java.io.File
 
 class LaoderForTile {
     fun saveGrid(context: Context, tiles: List<Tile>, gridName: String) {
-        val tileDataList = tiles.map { TileData(it.xCord, it.yCord, it.darfGehen) }
+        val tileDataList = tiles.map { TileData(it.xCord, it.yCord, it.darfGehen, it.darfGehen2) }
         val gridData = GridData(name = gridName, tiles = tileDataList)
 
         val json = Gson().toJson(gridData)
@@ -29,12 +29,19 @@ class LaoderForTile {
         gridData.tiles.forEach { tileData ->
             val tile = tiles.find { it.xCord == tileData.xCord && it.yCord == tileData.yCord }
             tile?.let {
-                if (tileData.darfGehen) {
+                /*if (tileData.darfGehen) {
                     it.currentImageRes = R.drawable.tileboden23542352
                     it.darfGehen = true
                 } else {
                     it.makeWandTile()
                     it.darfGehen=false
+                }*/
+                if (tileData.darfGehen2 == 0) {
+                    it.currentImageRes = R.drawable.tileboden23542352
+                    it.darfGehen2 = 0
+                } else {
+                    it.makeWandTile()
+                    it.darfGehen2 = 1
                 }
             }
         }

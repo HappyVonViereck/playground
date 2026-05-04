@@ -9,18 +9,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlin.random.Random
 
 class cheeseGerman: gridObjeckte() {
     @Composable
@@ -48,7 +41,8 @@ class cheeseGerman: gridObjeckte() {
 
 
 fun placeCheeseOnFreeTileRandom(vm: GameViewModel){
-    val freeTiles = vm.allTiles.filter { it.darfGehen }
+    val freeTiles2 = vm.allTiles.filter { it.darfGehen }
+    val freeTiles = vm.allTiles.filter { it.darfGehen2 == 0 }
 
     freeTiles.forEach { free->
         Log.d("Cheese","Tile(${free.xCord}, ${free.yCord}) ist angeblich keine wand darfgehen ist:${free.darfGehen}")
@@ -60,14 +54,14 @@ fun placeCheeseOnFreeTileRandom(vm: GameViewModel){
     }
 
     val randomTile = freeTiles.random()
+    randomTile.darfGehen2 = 3
     moveTo(randomTile.xCord, randomTile.yCord, vm.allTiles)
     Log.d("Cheese", "Käse platziert auf (${randomTile.xCord}, ${randomTile.yCord}) der status von darf gehen ist:${randomTile.darfGehen}")
-
 
 }
 }
 //platziere Käse
 //KäseErreicht bool
-//kann erreichtwerden bool
-//käse platzieren irgndwo
+//kann erreicht werden bool
+//käse platzieren irgendwo
 //Zuschauer modus aktivieren

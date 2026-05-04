@@ -43,15 +43,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
-//Ein viewmodel ist so zu sagen eine box wo man varibalen abstellen kann
+//Ein viewmodel ist so zu sagen eine box, wo man varibalen abstellen kann
 // und man dann die box holt kann man drauf zugreifen mit ver mehtoden,
-//Das heisst man kann mit mehrern mehtoden die varibalen /werte verändern man muss nur das viewmodel
+//Das heißt man kann mit mehreren methoden die varibalen /werte verändern man muss nur das viewmodel
 //an die methode weitergeben
 class GameViewModel : ViewModel() {
     val allTiles = mutableListOf<Tile>()
     var currentPath = mutableStateOf<List<Tile>>(emptyList())
+    val germanCheese = cheeseGerman()
     val maus = Maus()
-    val germanCheese= cheeseGerman()
     val tileSize = 40.dp
     var everythingisLoaded=false
 }
@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 // ─── App Einstiegspunkt ──────────────────────────────────────────────────────
 
 @Composable
@@ -75,6 +76,7 @@ fun App(vm: GameViewModel = viewModel()) {
     LaunchedEffect(vm.allTiles.size) {
 if(vm.allTiles.size>=100) {
     vm.maus.moveTo(7, 5, vm.allTiles)
+    vm.allTiles.filter { it.xCord == 7 && it.yCord == 5}[0].darfGehen2 = 2
     vm.germanCheese.placeCheeseOnFreeTileRandom(vm)
     Log.d("Debug", "Startpositionen gesetzt")
 }
@@ -95,7 +97,7 @@ if(vm.allTiles.size>=100) {
                 createSavebtn(vm.allTiles)
                 changetilesBtn(vm.allTiles)
                 knopf(vm)
-                käsePlatzierenTestbtn(vm)
+                // käsePlatzierenTestbtn(vm)
             }
             createTileSet(vm)
 
@@ -104,10 +106,8 @@ if(vm.allTiles.size>=100) {
         // hier alle anderen elemente die globale position brauchen
         vm.maus.createMaus()
         vm.germanCheese.createCheese()
+    }
 }
-}
-
-
 
 // ─── Buttons ─────────────────────────────────────────────────────────────────
 
@@ -129,7 +129,6 @@ fun createSavebtn(allTiles: MutableList<Tile>) {
             })
     { Text("Speichern") }
 
-
     // Speichern-Dialog
     if (showSaveDialog) { //wenn der trigger von knopf auf true ist wird der alert ausgelöst
         AlertDialog(
@@ -146,7 +145,7 @@ fun createSavebtn(allTiles: MutableList<Tile>) {
                     singleLine = true,
                     placeholder = { Text("z.B. level1") })
             },
-            confirmButton = { //Der knopf zum bestätigen wurde gedrückt
+            confirmButton = { //Der knopf zum Bestätigen wurde gedrückt
                 Button(
                     onClick = {
                         if (levelName.isNotBlank()) {
@@ -210,7 +209,7 @@ fun changetilesBtn(allTiles: MutableList<Tile>){
         allTiles.forEach { tile->
             tile.isInEditMode=!tile.isInEditMode
         }
-        Log.d("Btn", "es wurde in den Bearbeitungsmodus gewechelts ")
+        Log.d("Btn", "es wurde in den Bearbeitungsmodus gewechselt ")
     })
     {
         Text("bearbeiten")
@@ -219,100 +218,112 @@ fun changetilesBtn(allTiles: MutableList<Tile>){
 
 @Composable
 fun knopf(vm: GameViewModel) {
-    Log.d("cheese", "knopf: Käse soll gefudnen werden starten")
-    var start = remember { mutableStateOf(false) }
+    Log.d("cheese", "knopf: Käse soll gefunden werden starten")
+   // var start = remember { mutableStateOf(false) }
     Button(onClick = {
         Log.d("cheese", "knopf wurde gedrückt")
-        start.value = true
+        //start.value = true
+        bewegenMaustest(/*start,*/vm)
     }
     ){
         Text("Käse finden")
     }
-    bewegenMaustest(start,vm)
+    // checkAround(vm)
     goAPath(vm, vm.currentPath.value)
 }
 
-fun bewegenMaustest(start: MutableState<Boolean>,vm: GameViewModel){
-    if (start.value) {
+fun bewegenMaustest(/*start: MutableState<Boolean>,*/vm: GameViewModel){
+    //if (start.value) {
+    val tileWithCheese = vm.allTiles.filter { it.darfGehen2 == 3 }[0]
+    val tileWithMouse = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
+    val cheeseTile = vm.maus.sucheTile(tileWithCheese.xCord, tileWithCheese.yCord, vm.allTiles)
+    val mouseTile = vm.maus.sucheTile(tileWithMouse.xCord, tileWithMouse.yCord, vm.allTiles)
+    vm.currentPath.value = createAPath(mouseTile, cheeseTile, vm)
+      //  start.value = false
+    //}
+}
 
-        val aTile = vm.maus.sucheTile(7, 5, vm.allTiles)
-        val bTile = vm.maus.sucheTile(4, 1, vm.allTiles)
+fun checkAround(vm: GameViewModel) // find tile Mouse is standing on and inspect neighboring tiles
+{
+    val aroundOptions = mutableListOf<Tile>()
+    val tileWithMouse = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
+    val currentX = tileWithMouse.xCord
+    val currentY = tileWithMouse.yCord
+    val aboveMouse = vm.allTiles.filter { it.xCord == currentX && it.yCord == currentY - 1 }[0]
+    val belowMouse = vm.allTiles.filter { it.xCord == currentX && it.yCord == currentY + 1 }[0]
+    val leftMouse = vm.allTiles.filter { it.xCord == currentX - 1 && it.yCord == currentY }[0]
+    val rightMouse = vm.allTiles.filter { it.xCord == currentX + 1 && it.yCord == currentY }[0]
 
-        vm.currentPath.value = createAPath(aTile, bTile, vm)
-        start.value = false
-    }
-    }
+    aroundOptions.clear()
+    aroundOptions.add(aboveMouse)
+    aroundOptions.add(belowMouse)
+    aroundOptions.add(leftMouse)
+    aroundOptions.add(rightMouse)
+}
 
-
-@Composable
+/*@Composable
 fun käsePlatzierenTestbtn(vm: GameViewModel){
     Button(onClick = { vm.germanCheese.placeCheeseOnFreeTileRandom(vm)}){
         Text("käse los")
     }
-
-
-
-
-}
-
-
+}*/
 
 // ─── TileSet ─────────────────────────────────────────────────────────────────
 
 @Composable
 fun createTileSet(vm: GameViewModel) {
-        HorizontalGrid( 10, 10,  vm.allTiles, vm.maus,vm)
+    HorizontalGrid( 10, 10,  vm.allTiles, vm.maus,vm)
 }
 
 // ─── Grid ─────────────────────────────────────────────────────────────
 
 @Composable
 fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: Maus,vm: GameViewModel) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+        repeat(rows) { row ->
+            Row {
+                repeat(columns) { col ->
+                    val tileBlock = remember(row, col) {
+                        Tile().also { tile ->
+                            tile.xCord = col
+                            tile.yCord = row
 
-            repeat(rows) { row ->
-                Row {
-                    repeat(columns) { col ->
-                        val tileBlock = remember(row, col) {
-                            Tile().also { tile ->
-                                tile.xCord = col
-                                tile.yCord = row
-
-                                // Rand-Tiles als Mauer setzen
-                                if (col == 0 || col == columns - 1 || row == 0 || row == rows - 1) {
-                                    tile.toggleTile()
-                                }
-                                allTiles.add(tile)
+                            // Rand-Tiles als Mauer setzen
+                            if (col == 0 || col == columns - 1 || row == 0 || row == rows - 1) {
+                                tile.toggleTile()
                             }
+                            allTiles.add(tile)
                         }
+                    }
 
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            ),
-                            shape = CutCornerShape(0.dp),
-                            modifier = Modifier.size(vm.tileSize.value.dp)
-                        ) {
-                            tileBlock.createATile(maus, allTiles)
-                        }
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        shape = CutCornerShape(0.dp),
+                        modifier = Modifier.size(vm.tileSize.value.dp)
+                    ) {
+                        tileBlock.createATile(maus, allTiles)
                     }
                 }
             }
         }
     }
+}
 
 //───────DropDownMenu ─────────────────────────────────────────────────────────────
+
 @Composable
 fun dropDownMenu(vm: GameViewModel = viewModel()) {
-    var expandBool = remember { mutableStateOf(false) }
-    var selectedDataGrid = remember { mutableStateOf("") }
+    val expandBool = remember { mutableStateOf(false) }
+    val selectedDataGrid = remember { mutableStateOf("") }
     var textfiledSize by remember { mutableStateOf(Size.Zero) }
 
-    //ToogleSwitch
+    //ToggleSwitch
     val iconToggle = if (expandBool.value) {
         Icons.Filled.KeyboardArrowUp
     } else {
@@ -346,7 +357,6 @@ fun dropDownMenu(vm: GameViewModel = viewModel()) {
 //───────pathFinding ─────────────────────────────────────────────────────────────
 
 fun createAPath(tileA: Tile?, tileB: Tile?, vm: GameViewModel): List<Tile> {
-
 
     if (tileA == null || tileB == null) {
         return emptyList()
@@ -388,7 +398,6 @@ fun createAPath(tileA: Tile?, tileB: Tile?, vm: GameViewModel): List<Tile> {
 }
 @Composable
 fun goAPath(vm: GameViewModel,l:List<Tile>){
-
         LaunchedEffect(l) {
             l.forEach { tile ->
             vm.maus.moveTo(tile.xCord, tile.yCord, vm.allTiles)
@@ -401,7 +410,7 @@ fun goAPath(vm: GameViewModel,l:List<Tile>){
 //Das hab ich gelernt: Man kann in den function parameter datentypen übergeben wenn sie ein mutableState haben
 // und mit
 // dasObjectZumÄndern.value="GeänderterText"
-//ändern es ist dann immer noch das selbe objeckt es wird kein neues erzeugt oder so
+//ändern es ist dann immer noch das selbe objekt es wird kein neues erzeugt oder so
 
 
 

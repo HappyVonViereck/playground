@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 data class TileData(
     val xCord: Int = 0,
     val yCord: Int = 0,
-    val darfGehen: Boolean = true
+    val darfGehen: Boolean = true,
+    val darfGehen2: Int
 )
 
 @Serializable
