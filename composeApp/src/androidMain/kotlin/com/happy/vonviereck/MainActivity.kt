@@ -91,12 +91,12 @@ fun App(vm: GameViewModel = viewModel(),onVictory: () -> Unit = {})
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     LaunchedEffect(vm.isVictory) {
         if (vm.isVictory) {
             onVictory()
         }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
         mainScreen()
         Box(modifier = Modifier.padding(top = 150.dp)) {
             Column(
@@ -124,6 +124,7 @@ fun App(vm: GameViewModel = viewModel(),onVictory: () -> Unit = {})
         vm.germanCheese.createCheese()
     }
 }
+
 
 
 // ─── Buttons ─────────────────────────────────────────────────────────────────
