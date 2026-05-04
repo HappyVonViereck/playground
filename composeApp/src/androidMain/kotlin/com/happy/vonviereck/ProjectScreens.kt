@@ -13,7 +13,8 @@ import androidx.navigation.compose.rememberNavController
 
 enum class DifferentScreens {
     Start,
-    Maze
+    Maze,
+    Victory
 }
 
 /*@OptIn(ExperimentalMaterial3Api::class)
@@ -25,13 +26,13 @@ fun MouseAppBar(
 ) {
     TopAppBar(
         title = { Text(stringResource(id = R.string.app_name)) },
-        *//*colors = TopAppBarDefaults.topAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             scrolledContainerColor = Color.Unspecified,
             navigationIconContentColor = Color.Unspecified,
             titleContentColor = Color.Unspecified,
             actionIconContentColor = Color.Unspecified
-        ),*//*
+        ),
         modifier = modifier,
         navigationIcon = {
             if (canNavigateBack) {
@@ -67,7 +68,17 @@ fun StartApp(
                 )
             }
             composable(route = DifferentScreens.Maze.name) {
-                App()
+                App( onVictory = { navController.navigate(DifferentScreens.Victory.name) })
+            }
+
+            composable(route = DifferentScreens.Victory.name) {
+                victoryScreen(
+                    onNextButtonClicked = {
+                      returnToStart(navController)
+                    },
+                    modifier = Modifier.fillMaxSize()
+                        .padding(dimensionResource(R.dimen.padding_medium))
+                )
             }
 
            /*  composable(route = DifferentScreens.Pickup.name) {
