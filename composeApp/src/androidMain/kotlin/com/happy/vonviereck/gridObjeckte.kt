@@ -2,13 +2,14 @@ package com.happy.vonviereck
 
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 open class gridObjeckte {
 
-    var xCordPos by mutableStateOf(0)
-    var yCordPos by mutableStateOf(0)
+    var xCordPos by mutableIntStateOf(0)
+    var yCordPos by mutableIntStateOf(0)
     var currentTile by mutableStateOf<Tile?>(null)
 
     fun sucheTile(xCord: Int, yCord: Int, allTiles: List<Tile>): Tile? {

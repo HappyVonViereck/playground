@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -41,6 +42,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
 //Ein viewmodel ist so zu sagen eine box, wo man varibalen abstellen kann
@@ -49,11 +51,11 @@ import kotlinx.coroutines.delay
 //an die methode weitergeben
 class GameViewModel : ViewModel() {
     val allTiles = mutableListOf<Tile>()
+    val aroundOptions = mutableListOf<Tile>()
     var currentPath = mutableStateOf<List<Tile>>(emptyList())
     val germanCheese = cheeseGerman()
     val maus = Maus()
     val tileSize = 40.dp
-    var everythingisLoaded=false
 }
 
 // ─── Activity ────────────────────────────────────────────────────────────────
@@ -72,37 +74,35 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun App(vm: GameViewModel = viewModel()) {
-
     LaunchedEffect(vm.allTiles.size) {
-if(vm.allTiles.size>=100) {
-    vm.maus.moveTo(7, 5, vm.allTiles)
-    vm.allTiles.filter { it.xCord == 7 && it.yCord == 5}[0].darfGehen2 = 2
-    vm.germanCheese.placeCheeseOnFreeTileRandom(vm)
-    Log.d("Debug", "Startpositionen gesetzt")
-}
+        if(vm.allTiles.size>=100) {
+            vm.maus.moveTo(7, 5, vm.allTiles)
+            vm.allTiles.filter { it.xCord == 7 && it.yCord == 5}[0].darfGehen2 = 2
+            vm.germanCheese.placeCheeseOnFreeTileRandom(vm)
+            Log.d("Debug", "Startpositionen gesetzt")
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()){
         mainScreen()
-    Box(modifier = Modifier.padding(top = 150.dp))
+        Box(modifier = Modifier.padding(top = 150.dp))
         {
-        Column(
-            modifier = Modifier
-                .padding(top = 80.dp)
-                .align(Alignment.TopCenter),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            dropDownMenu()
-            Row(horizontalArrangement = Arrangement.Start) {
-                createSavebtn(vm.allTiles)
-                changetilesBtn(vm.allTiles)
-                knopf(vm)
-                // käsePlatzierenTestbtn(vm)
+            Column(
+                modifier = Modifier
+                    .padding(top = 80.dp)
+                    .align(Alignment.TopCenter),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                dropDownMenu()
+                Row(horizontalArrangement = Arrangement.Start) {
+                    createSavebtn(vm.allTiles)
+                    changetilesBtn(vm.allTiles)
+                    knopf(vm)
+                    // käsePlatzierenTestbtn(vm)
+                }
+                createTileSet(vm)
             }
-            createTileSet(vm)
-
         }
-    }
         // hier alle anderen elemente die globale position brauchen
         vm.maus.createMaus()
         vm.germanCheese.createCheese()
@@ -151,8 +151,8 @@ fun createSavebtn(allTiles: MutableList<Tile>) {
                         if (levelName.isNotBlank()) {
                             loader.saveGrid(context, allTiles, levelName)
                             showSaveDialog = false
-                            levelName = "" //leert die textbox damit man beim nächten levelbennen
-                                           // eine freie Textbox hat
+                            levelName = "" //leert die textbox damit man beim nächten level benennen
+                            // eine freie Textbox hat
                         }
                     }) { Text("Speichern") }
             },
@@ -166,7 +166,7 @@ fun createSavebtn(allTiles: MutableList<Tile>) {
 
 @Composable
 fun gridLadenButtons(allTiles: MutableList<Tile>, enabledState: MutableState<Boolean>, titel: MutableState<String>)
- {
+{
     val context = LocalContext.current
     val loader = LaoderForTile()
     var savedLevels by remember { mutableStateOf(loader.getAllSavedLevels(context)) }
@@ -202,6 +202,7 @@ fun gridLadenButtons(allTiles: MutableList<Tile>, enabledState: MutableState<Boo
         )
     }
 }
+
 @Composable
 fun changetilesBtn(allTiles: MutableList<Tile>){
 
@@ -218,34 +219,74 @@ fun changetilesBtn(allTiles: MutableList<Tile>){
 
 @Composable
 fun knopf(vm: GameViewModel) {
+    val start = remember { mutableStateOf(false) }
     Log.d("cheese", "knopf: Käse soll gefunden werden starten")
-   // var start = remember { mutableStateOf(false) }
     Button(onClick = {
+        // bewegenMaustest(vm)
+        start.value = true
         Log.d("cheese", "knopf wurde gedrückt")
-        //start.value = true
-        bewegenMaustest(/*start,*/vm)
     }
     ){
         Text("Käse finden")
     }
-    // checkAround(vm)
+    bewegenMaustest(start, vm)
+
+  /*  if (start.value)
+    {
+        // loop this until mouse hits cheese tile
+        do{     bewegenMaustest(start, vm)
+            goAPath(vm, vm.currentPath.value)
+        }
+        while (vm.tileWithMouse != vm.tileWithCheese)
+    }
+*/
     goAPath(vm, vm.currentPath.value)
 }
 
-fun bewegenMaustest(/*start: MutableState<Boolean>,*/vm: GameViewModel){
-    //if (start.value) {
-    val tileWithCheese = vm.allTiles.filter { it.darfGehen2 == 3 }[0]
-    val tileWithMouse = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
-    val cheeseTile = vm.maus.sucheTile(tileWithCheese.xCord, tileWithCheese.yCord, vm.allTiles)
-    val mouseTile = vm.maus.sucheTile(tileWithMouse.xCord, tileWithMouse.yCord, vm.allTiles)
-    vm.currentPath.value = createAPath(mouseTile, cheeseTile, vm)
-      //  start.value = false
-    //}
+fun bewegenMaustest(start: MutableState<Boolean>, vm: GameViewModel) { // need a loop somewhere to repeat it until the cheese has been reached
+    if (start.value) {
+        val tileWithCheese = vm.allTiles.filter { it.darfGehen2 == 3 }[0]
+        val tileWithMouse = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
+        val xDifference = abs(tileWithMouse.xCord - tileWithCheese.xCord)
+        val yDifference = abs(tileWithMouse.yCord - tileWithCheese.yCord)
+        val xIsCloser = xDifference < yDifference // defines whether rat will close in on the cheese on the x- or the y-axis first
+        var chosenTile = vm.allTiles.filter { it.darfGehen2 == 3 }[0]
+
+        checkAround(vm)
+        // define a 1-step path here, which uses a tile in aroundOptions and brings the rat the closest to the cheese
+        if (xIsCloser && xDifference != 0 || yDifference == 0) {
+            if (tileWithMouse.xCord > tileWithCheese.xCord) { // move left
+                if (vm.aroundOptions[2].darfGehen2 != 1) {
+                    chosenTile = vm.aroundOptions[2]
+                }
+            } else { // move right
+                if (vm.aroundOptions[3].darfGehen2 != 1) {
+                    chosenTile = vm.aroundOptions[3]
+                }
+            }
+        } else {
+            if (tileWithMouse.yCord > tileWithCheese.yCord) { // move down
+                if (vm.aroundOptions[0].darfGehen2 != 1) {
+                    chosenTile = vm.aroundOptions[0]
+                }
+            } else { // move up
+                if (vm.aroundOptions[1].darfGehen2 != 1) {
+                    chosenTile = vm.aroundOptions[1]
+                }
+            }
+        }
+        tileWithMouse.darfGehen2 = 0 // sets prior tile with mouse to open
+        chosenTile.darfGehen2 = 2 // sets tile mouse moved to, to mouse
+        vm.currentPath.value = createAPath(
+            tileWithMouse,
+            chosenTile,
+            vm
+        ) // moves mouse to adjacent tile that brings it closest to the cheese
+        start.value = false
+    }
 }
 
-fun checkAround(vm: GameViewModel) // find tile Mouse is standing on and inspect neighboring tiles
-{
-    val aroundOptions = mutableListOf<Tile>()
+fun checkAround(vm: GameViewModel) { // find tile Mouse is standing on and inspect neighboring tiles
     val tileWithMouse = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
     val currentX = tileWithMouse.xCord
     val currentY = tileWithMouse.yCord
@@ -254,11 +295,18 @@ fun checkAround(vm: GameViewModel) // find tile Mouse is standing on and inspect
     val leftMouse = vm.allTiles.filter { it.xCord == currentX - 1 && it.yCord == currentY }[0]
     val rightMouse = vm.allTiles.filter { it.xCord == currentX + 1 && it.yCord == currentY }[0]
 
-    aroundOptions.clear()
-    aroundOptions.add(aboveMouse)
-    aroundOptions.add(belowMouse)
-    aroundOptions.add(leftMouse)
-    aroundOptions.add(rightMouse)
+    vm.aroundOptions.clear()
+    vm.aroundOptions.add(aboveMouse)
+    vm.aroundOptions.add(belowMouse)
+    vm.aroundOptions.add(leftMouse)
+    vm.aroundOptions.add(rightMouse)
+
+    /*for (option in vm.aroundOptions) {
+        if (option.darfGehen2 != 0)
+        {
+            vm.aroundOptions.remove(option) // removes surrounding tiles that aren't free
+        }
+    }*/
 }
 
 /*@Composable
@@ -398,8 +446,8 @@ fun createAPath(tileA: Tile?, tileB: Tile?, vm: GameViewModel): List<Tile> {
 }
 @Composable
 fun goAPath(vm: GameViewModel,l:List<Tile>){
-        LaunchedEffect(l) {
-            l.forEach { tile ->
+    LaunchedEffect(l) {
+        l.forEach { tile ->
             vm.maus.moveTo(tile.xCord, tile.yCord, vm.allTiles)
             delay(500L)
         }

@@ -39,7 +39,7 @@ class Tile {
     fun createATile(maus: Maus,allTiles: MutableList<Tile>) {
         val painter = painterResource(currentImageRes)
         Box(
-            modifier = Modifier //Die Box wird benötigt damit man mehrer ui elemente zusammenfügen kann
+            modifier = Modifier //Die Box wird benötigt damit man mehrere ui elemente zusammenfügen kann
                 .fillMaxSize()
                 .onGloballyPositioned {
                     val pos = it.positionInRoot()
@@ -48,7 +48,7 @@ class Tile {
                     Log.d("Tile", "POSITION gesetzt: xCord=$xCordPos, yCord=$yCordPos")
                 }) {
             Image(
-                //1.UIelement das Tile
+                //1.UIelement des Tile
                 modifier = Modifier.fillMaxSize(),
                 painter = painter,
                 contentDescription = null,
@@ -69,7 +69,6 @@ class Tile {
     fun toggleTile() {
         //if (darfGehen) {
         if (darfGehen2 == 0) {
-
             currentImageRes = R.drawable.hindernisse
             darfGehen = false
             darfGehen2 = 1
