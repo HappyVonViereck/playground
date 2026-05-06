@@ -74,7 +74,7 @@ fun StartApp(
             composable(route = DifferentScreens.Victory.name) {
                 victoryScreen(
                     onNextButtonClicked = {
-                      returnToStart(navController)
+                      returnToMaze(navController)
                     },
                     modifier = Modifier.fillMaxSize()
                         .padding(dimensionResource(R.dimen.padding_medium))
@@ -98,4 +98,10 @@ private fun returnToStart(
     navController: NavHostController
 ) {
     navController.popBackStack(DifferentScreens.Start.name, false)
+}
+
+private fun returnToMaze(navController: NavHostController) {
+    navController.navigate(DifferentScreens.Maze.name) {
+        popUpTo(DifferentScreens.Maze.name) { inclusive = true }
+    }
 }

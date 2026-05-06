@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.happy.vonviereck.btnStyle
 
 @Composable
 fun MainMenuScreen(
@@ -34,8 +36,9 @@ fun StartButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.widthIn(min = 250.dp)
+        modifier = modifier.widthIn(min = 250.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = btnStyle.bgColor)
     ) {
-        Text("Start")
+        Text("Start",color = btnStyle.fontColor)
     }
 }

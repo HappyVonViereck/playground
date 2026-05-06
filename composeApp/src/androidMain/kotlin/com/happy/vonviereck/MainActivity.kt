@@ -73,15 +73,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-           StartApp()
+            StartApp()
         }
     }
 }
 // ─── App Einstiegspunkt ──────────────────────────────────────────────────────
 
 @Composable
-fun App(vm: GameViewModel = viewModel(),onVictory: () -> Unit = {})
-{
+fun App(vm: GameViewModel = viewModel(), onVictory: () -> Unit = {}) {
 
     LaunchedEffect(vm.allTiles.size) {
         if (vm.allTiles.size >= 100) {
@@ -92,11 +91,11 @@ fun App(vm: GameViewModel = viewModel(),onVictory: () -> Unit = {})
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-    LaunchedEffect(vm.isVictory) {
-        if (vm.isVictory) {
-            onVictory()
+        LaunchedEffect(vm.isVictory) {
+            if (vm.isVictory) {
+                onVictory()
+            }
         }
-    }
         mainScreen()
         Box(modifier = Modifier.padding(top = 150.dp)) {
             Column(
@@ -126,22 +125,20 @@ fun App(vm: GameViewModel = viewModel(),onVictory: () -> Unit = {})
 }
 
 
-
 // ─── Buttons ─────────────────────────────────────────────────────────────────
 @Composable
-fun victory(vm: GameViewModel){
+fun victory(vm: GameViewModel) {
     Button(
         onClick = {
-    vm.isVictory=true
-        },colors = ButtonDefaults.buttonColors(
+            vm.isVictory = true
+        }, colors = ButtonDefaults.buttonColors(
             containerColor = btnStyle.bgColor
-
         )
-    )
-    {
-            Text(text="Victory here", color = btnStyle.fontColor)
-        }
+    ) {
+        Text(text = "Victory here", color = btnStyle.fontColor)
+    }
 }
+
 @Composable
 fun createSavebtn(allTiles: MutableList<Tile>) {
     val context = LocalContext.current
@@ -208,13 +205,10 @@ fun gridLadenButtons(
         isPressed = interactionSource.collectIsPressedAsState().value
 
         DropdownMenuItem(
-            modifier = Modifier
-                .background(
-                    if (isPressed) btnStyle.bgColor
-                    else Color.Transparent
-                ),
-            interactionSource = interactionSource,
-            text = {
+            modifier = Modifier.background(
+                if (isPressed) btnStyle.bgColor
+                else Color.Transparent
+            ), interactionSource = interactionSource, text = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -342,7 +336,7 @@ fun HorizontalGrid(
                         shape = CutCornerShape(0.dp),
                         modifier = Modifier.size(vm.tileSize.value.dp)
                     ) {
-                        tileBlock.createATile(vm.maus,vm.allTiles)
+                        tileBlock.createATile(vm.maus, vm.allTiles)
                     }
                 }
             }
