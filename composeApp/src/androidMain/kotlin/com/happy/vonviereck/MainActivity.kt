@@ -250,7 +250,7 @@ fun bewegenMaustest(start: MutableState<Boolean>, vm: GameViewModel) { // need a
         val xDifference = abs(tileWithMouse.xCord - tileWithCheese.xCord)
         val yDifference = abs(tileWithMouse.yCord - tileWithCheese.yCord)
         val xIsCloser = xDifference < yDifference // defines whether rat will close in on the cheese on the x- or the y-axis first
-        var chosenTile = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
+        var chosenTile = vm.allTiles.filter { it.darfGehen2 == 3 }[0]
 
         checkAround(vm)
         // define a 1-step path here, which uses a tile in aroundOptions and brings the rat the closest to the cheese
@@ -275,6 +275,7 @@ fun bewegenMaustest(start: MutableState<Boolean>, vm: GameViewModel) { // need a
                 }
             }
         }
+
         tileWithMouse.darfGehen2 = 0 // sets prior tile with mouse to open
         Log.d("chosen", "chosenTile ist ${chosenTile.darfGehen2}")
         chosenTile.darfGehen2 = 2 // sets tile mouse moved to, to mouse
@@ -302,15 +303,8 @@ fun checkAround(vm: GameViewModel) { // find tile Mouse is standing on and inspe
     vm.aroundOptions.add(leftMouse)
     vm.aroundOptions.add(rightMouse)
 
-    /*for (item in vm.aroundOptions) {
+    /*for (item in vm.aroundOptions) { // sets tiles surrounding the rat visually to walls to check if they are the correct tiles
     item.currentImageRes
-    }*/
-
-    /*for (option in vm.aroundOptions) {
-        if (option.darfGehen2 != 0)
-        {
-            vm.aroundOptions.remove(option) // removes surrounding tiles that aren't free
-        }
     }*/
 }
 

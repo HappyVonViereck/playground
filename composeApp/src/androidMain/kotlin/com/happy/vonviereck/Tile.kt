@@ -73,7 +73,7 @@ class Tile {
             darfGehen = false
             darfGehen2 = 1
             Log.d("Tile", "Tile x=$xCord, y=$yCord → Mauer")
-        } else {
+        } else if (darfGehen2 == 1) {
             currentImageRes = R.drawable.tileboden23542352
             darfGehen = true
             darfGehen2 = 0
