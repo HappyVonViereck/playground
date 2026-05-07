@@ -250,7 +250,7 @@ fun bewegenMaustest(start: MutableState<Boolean>, vm: GameViewModel) { // need a
         val xDifference = abs(tileWithMouse.xCord - tileWithCheese.xCord)
         val yDifference = abs(tileWithMouse.yCord - tileWithCheese.yCord)
         val xIsCloser = xDifference < yDifference // defines whether rat will close in on the cheese on the x- or the y-axis first
-        var chosenTile = vm.allTiles.filter { it.darfGehen2 == 3 }[0]
+        var chosenTile = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
 
         checkAround(vm)
         // define a 1-step path here, which uses a tile in aroundOptions and brings the rat the closest to the cheese
