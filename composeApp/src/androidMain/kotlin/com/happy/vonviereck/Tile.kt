@@ -20,10 +20,8 @@ import androidx.compose.ui.res.painterResource
 class Tile {
     var xCord = 0 //für grid
     var yCord = 0 //für grid
-
     var xCordPos = 0 //BildschirmPosition in pixelGenau
     var yCordPos = 0 //BildschirmPosition in pixelGenau
-
     var currentImageRes by mutableIntStateOf(R.drawable.tileboden23542352)  //Der originalTile kann aber zu hinderniss werden -> mutableStateOF wird dann benötigt weil man es ändert
     var darfGehen = true //Bool zum Überprüfen, ob man das Tile betreten darf
     var darfGehen2 = 0

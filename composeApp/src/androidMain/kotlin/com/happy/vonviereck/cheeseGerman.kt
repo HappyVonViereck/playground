@@ -57,7 +57,6 @@ fun placeCheeseOnFreeTileRandom(vm: GameViewModel){
     randomTile.darfGehen2 = 3
     moveTo(randomTile.xCord, randomTile.yCord, vm.allTiles)
     Log.d("Cheese", "Käse platziert auf (${randomTile.xCord}, ${randomTile.yCord}) der status von darf gehen ist:${randomTile.darfGehen}")
-
 }
 }
 //platziere Käse

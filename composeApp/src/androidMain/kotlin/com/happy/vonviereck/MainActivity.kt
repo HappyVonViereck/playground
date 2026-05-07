@@ -45,20 +45,21 @@ import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 
 // ─── ViewModel ───────────────────────────────────────────────────────────────
-//Ein viewmodel ist so zu sagen eine box wo man varibalen abstellen kann
-// und man dann die box holt kann man drauf zugreifen mit ver mehtoden,
-//Das heisst man kann mit mehrern mehtoden die varibalen /werte verändern man muss nur das viewmodel
+//Ein viewmodel ist so zu sagen eine box, wo man variablen abstellen kann
+// und man dann die Box holt kann man drauf zugreifen mit ver methoden,
+//Dass heißt man kann mit mehreren methoden die variablen /werte verändern man muss nur das viewmodel
 //an die methode weitergeben
 class GameViewModel : ViewModel() {
     val allTiles = mutableListOf<Tile>()
+    val aroundOptions = mutableListOf<Tile>()
     var currentPath = mutableStateOf<List<Tile>>(emptyList())
     val maus = Maus()
     val germanCheese = cheeseGerman()
     val tileSize = 40.dp
-    var everythingisLoaded = false
-
+    var tileChosen = false
     var isVictory by mutableStateOf(false) //Auslöser Bool zum wechseln des Screens
 }
 
@@ -77,6 +78,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 // ─── App Einstiegspunkt ──────────────────────────────────────────────────────
 
 @Composable
@@ -84,7 +86,8 @@ fun App(vm: GameViewModel = viewModel(), onVictory: () -> Unit = {}) {
 
     LaunchedEffect(vm.allTiles.size) {
         if (vm.allTiles.size >= 100) {
-            vm.maus.moveTo(7, 5, vm.allTiles)
+            vm.maus.moveTo(1, 1, vm.allTiles)
+            vm.allTiles.filter { it.xCord == 1 && it.yCord == 1}[0].darfGehen2 = 2
             vm.germanCheese.placeCheeseOnFreeTileRandom(vm)
             Log.d("Debug", "Startpositionen gesetzt")
         }
@@ -111,7 +114,7 @@ fun App(vm: GameViewModel = viewModel(), onVictory: () -> Unit = {}) {
                 }
                 Row(horizontalArrangement = Arrangement.Start) {
                     knopf(vm)
-                    käsePlatzierenTestbtn(vm)
+                    // KäsePlatzierenTestbtn(vm)
                     victory(vm)
                 }
                 createTileSet(vm)
@@ -124,8 +127,8 @@ fun App(vm: GameViewModel = viewModel(), onVictory: () -> Unit = {}) {
     }
 }
 
-
 // ─── Buttons ─────────────────────────────────────────────────────────────────
+
 @Composable
 fun victory(vm: GameViewModel) {
     Button(
@@ -161,7 +164,7 @@ fun createSavebtn(allTiles: MutableList<Tile>) {
 
 
     // Speichern-Dialog
-    if (showSaveDialog) { //wenn der trigger von knopf auf true ist wird der alert ausgelöst
+    if (showSaveDialog) { //wenn der trigger von knopf auf true ist, wird der alert ausgelöst
         AlertDialog(onDismissRequest = {
             showSaveDialog = false
             levelName = ""
@@ -172,7 +175,7 @@ fun createSavebtn(allTiles: MutableList<Tile>) {
                 label = { Text("Level-Name") },
                 singleLine = true,
                 placeholder = { Text("z.B. level1") })
-        }, confirmButton = { //Der knopf zum bestätigen wurde gedrückt
+        }, confirmButton = { //Der knopf zum Bestätigen wurde gedrückt
             Button(
                 onClick = {
                     if (levelName.isNotBlank()) {
@@ -244,7 +247,7 @@ fun changetilesBtn(allTiles: MutableList<Tile>) {
             allTiles.forEach { tile ->
                 tile.isInEditMode = !tile.isInEditMode
             }
-            Log.d("Btn", "es wurde in den Bearbeitungsmodus gewechelts ")
+            Log.d("Btn", "es wurde in den Bearbeitungsmodus gewechselt ")
         }, colors = ButtonDefaults.buttonColors(
             containerColor = btnStyle.bgColor
 
@@ -256,37 +259,86 @@ fun changetilesBtn(allTiles: MutableList<Tile>) {
 
 @Composable
 fun knopf(vm: GameViewModel) {
-
-    var start = remember { mutableStateOf(false) }
-    Button(
-        onClick = {
-            Log.d("Debug", "Knopf zum testen wurde gedrückt")
-            start.value = true
-        }, colors = ButtonDefaults.buttonColors(
-            containerColor = btnStyle.bgColor
-
-        )
-    ) {
-        Text("Test1", color = btnStyle.fontColor)
+    Log.d("cheese", "knopf: Käse soll gefunden werden starten")
+    Button(onClick = {
+        bewegenMaustest(vm)
+        Log.d("cheese", "knopf wurde gedrückt")
     }
-    bewegenMaustest(start, vm)
+    ){
+        Text("Käse finden")
+    }
+
     goAPath(vm, vm.currentPath.value)
 }
 
-fun bewegenMaustest(start: MutableState<Boolean>, vm: GameViewModel) {
-    if (start.value) {
+fun bewegenMaustest(vm: GameViewModel) { // need a loop somewhere to repeat it until the cheese has been reached
+    val tileWithCheese = vm.allTiles.filter { it.darfGehen2 == 3 }[0]
+    val tileWithMouse = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
+    val xDifference = abs(tileWithMouse.xCord - tileWithCheese.xCord)
+    val yDifference = abs(tileWithMouse.yCord - tileWithCheese.yCord)
+    var xIsCloser = xDifference < yDifference // defines whether rat will close in on the cheese on the x- or the y-axis first
+    var chosenTile = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
 
-        val aTile = vm.maus.sucheTile(7, 5, vm.allTiles)
-        val bTile = vm.maus.sucheTile(4, 1, vm.allTiles)
+    checkAround(vm)
+    // define a 1-step path here, which uses a tile in aroundOptions and brings the rat the closest to the cheese
+    while (!vm.tileChosen)
+    {
+        if (xIsCloser && xDifference != 0 || yDifference == 0) {
+            if (tileWithMouse.xCord > tileWithCheese.xCord && vm.aroundOptions[2].darfGehen2 != 1) { // move left
+                chosenTile = vm.aroundOptions[2]
+                vm.tileChosen = true
+            } else if (vm.aroundOptions[3].darfGehen2 != 1) { // move right
+                chosenTile = vm.aroundOptions[3]
+                vm.tileChosen = true
+            }
+            else {
+                xIsCloser = false
+            }
+        } else {
+            if (tileWithMouse.yCord > tileWithCheese.yCord && vm.aroundOptions[0].darfGehen2 != 1) { // move down
+                chosenTile = vm.aroundOptions[0]
+                vm.tileChosen = true
+            } else if (vm.aroundOptions[1].darfGehen2 != 1) { // move up
+                chosenTile = vm.aroundOptions[1]
+                vm.tileChosen = true
+            }
+        }
+    }
 
-        vm.currentPath.value = createAPath(aTile, bTile, vm)
-        start.value = false
+    vm.tileChosen = false
+    tileWithMouse.darfGehen2 = 0 // sets prior tile with mouse to open
+    chosenTile.darfGehen2 = 2 // sets tile mouse moved to, to mouse
+
+    vm.currentPath.value = createAPath(
+        tileWithMouse,
+        chosenTile,
+        vm
+    ) // moves mouse to adjacent tile that brings it closest to the cheese
+}
+
+fun checkAround(vm: GameViewModel) { // find tile Mouse is standing on and inspect neighboring tiles
+    val tileWithMouse = vm.allTiles.filter { it.darfGehen2 == 2 }[0]
+    val currentX = tileWithMouse.xCord
+    val currentY = tileWithMouse.yCord
+    val aboveMouse = vm.allTiles.filter { it.xCord == currentX && it.yCord == currentY - 1 }[0]
+    val belowMouse = vm.allTiles.filter { it.xCord == currentX && it.yCord == currentY + 1 }[0]
+    val leftMouse = vm.allTiles.filter { it.xCord == currentX - 1 && it.yCord == currentY }[0]
+    val rightMouse = vm.allTiles.filter { it.xCord == currentX + 1 && it.yCord == currentY }[0]
+
+    vm.aroundOptions.clear()
+    vm.aroundOptions.add(aboveMouse)
+    vm.aroundOptions.add(belowMouse)
+    vm.aroundOptions.add(leftMouse)
+    vm.aroundOptions.add(rightMouse)
+
+    for (item in vm.aroundOptions) { // sets tiles surrounding the rat visually to walls to check if they are the correct tiles
+        item.currentImageRes = R.drawable.hindernisse
     }
 }
 
 
 @Composable
-fun käsePlatzierenTestbtn(vm: GameViewModel) {
+fun KäsePlatzierenTestbtn(vm: GameViewModel) {
     Button(
         onClick = { vm.germanCheese.placeCheeseOnFreeTileRandom(vm) },
         colors = ButtonDefaults.buttonColors(
@@ -305,10 +357,7 @@ fun createTileSet(vm: GameViewModel) {
 }
 
 @Composable
-fun HorizontalGrid(
-    rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: Maus, vm: GameViewModel
-) {
-
+fun HorizontalGrid(rows: Int, columns: Int, allTiles: MutableList<Tile>, maus: Maus, vm: GameViewModel) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
     ) {
@@ -385,8 +434,6 @@ fun dropDownMenu(vm: GameViewModel = viewModel()) {
 //───────pathFinding ─────────────────────────────────────────────────────────────
 
 fun createAPath(tileA: Tile?, tileB: Tile?, vm: GameViewModel): List<Tile> {
-
-
     if (tileA == null || tileB == null) {
         return emptyList()
     }
@@ -428,11 +475,14 @@ fun createAPath(tileA: Tile?, tileB: Tile?, vm: GameViewModel): List<Tile> {
 
 @Composable
 fun goAPath(vm: GameViewModel, l: List<Tile>) {
-
     LaunchedEffect(l) {
         l.forEach { tile ->
             vm.maus.moveTo(tile.xCord, tile.yCord, vm.allTiles)
             delay(500L)
+        }
+
+        if(vm.allTiles.none { it.darfGehen2 == 3 }) {
+            vm.isVictory = true // enables win condition, when rat reaches the cheese
         }
     }
 }
