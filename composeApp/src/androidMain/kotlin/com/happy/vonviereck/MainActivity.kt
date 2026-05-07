@@ -263,9 +263,10 @@ fun knopf(vm: GameViewModel) {
     Button(onClick = {
         bewegenMaustest(vm)
         Log.d("cheese", "knopf wurde gedrückt")
-    }
+    }, colors = ButtonDefaults.buttonColors(
+        containerColor = btnStyle.bgColor)
     ){
-        Text("Käse finden")
+        Text("Käse finden", color = btnStyle.fontColor)
     }
 
     goAPath(vm, vm.currentPath.value)
@@ -331,9 +332,9 @@ fun checkAround(vm: GameViewModel) { // find tile Mouse is standing on and inspe
     vm.aroundOptions.add(leftMouse)
     vm.aroundOptions.add(rightMouse)
 
-    for (item in vm.aroundOptions) { // sets tiles surrounding the rat visually to walls to check if they are the correct tiles
+   /* for (item in vm.aroundOptions) { // sets tiles surrounding the rat visually to walls to check if they are the correct tiles
         item.currentImageRes = R.drawable.hindernisse
-    }
+    }*/
 }
 
 

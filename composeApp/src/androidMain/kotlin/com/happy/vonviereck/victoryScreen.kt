@@ -76,7 +76,7 @@ fun victoryScreen(
         Button(
             onClick = { openDialog.value = true  },
             colors = ButtonDefaults.buttonColors(containerColor = btnStyle.bgColor))
-            { Text("Sehe Statistiken zum letzen Labyrinth",color = btnStyle.fontColor) }
+            { Text("Sehe Statistiken zum letzten Labyrinth",color = btnStyle.fontColor) }
         if (openDialog.value) {
             BasicAlertDialog(
                 onDismissRequest = {
