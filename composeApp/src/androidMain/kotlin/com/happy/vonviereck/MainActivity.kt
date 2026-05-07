@@ -72,12 +72,14 @@ class MainActivity : ComponentActivity() {
 
 // ─── App Einstiegspunkt ──────────────────────────────────────────────────────
 
+
+//TODO: hier ist der fehler wegen der maus und den offset
 @Composable
 fun App(vm: GameViewModel = viewModel()) {
     LaunchedEffect(vm.allTiles.size) {
         if(vm.allTiles.size>=100) {
-            vm.maus.moveTo(7, 5, vm.allTiles)
-            vm.allTiles.filter { it.xCord == 7 && it.yCord == 5}[0].darfGehen2 = 2
+            vm.maus.moveTo(1, 1, vm.allTiles)
+            vm.allTiles.filter { it.xCord == 1 && it.yCord == 1}[0].darfGehen2 = 2
             vm.germanCheese.placeCheeseOnFreeTileRandom(vm)
             Log.d("Debug", "Startpositionen gesetzt")
         }
